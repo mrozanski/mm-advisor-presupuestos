@@ -3,148 +3,250 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Presupuesto — MM Advisors (Phase 1 Test)</title>
+  <title>Presupuesto de Viaje — Marina Mosmann Advisor</title>
+  <meta name="description" content="Presupuesto de viaje personalizado — Marina Mosmann Advisor, Agencia de Turismo & Excursiones en Bariloche">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
 <body>
-  <h1>Phase 1 — Data Loop Test</h1>
-  <pre id="output" style="white-space: pre-wrap; font-family: monospace; padding: 16px; background: #f5f5f5; border-radius: 8px;"></pre>
 
-  <script>
-    // ── Configuration ────────────────────────────────────────
-    const API_KEY = 'AIzaSyAPM00wGH79nT0bIvAXSb3TDMMcnULjydU';
-    const SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
+  <!-- ══ 1. HEADER / HERO ══════════════════════════════════ -->
+  <header>
+    <div class="hero-inner">
 
-    // ── Helpers ──────────────────────────────────────────────
-    function log(msg) {
-      console.log(msg);
-      document.getElementById('output').textContent += msg + '\n';
-    }
+      <!-- Logo inline SVG -->
+      <svg class="hero-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 225 110" aria-label="Marina Mosmann Advisor" role="img">
+        <defs><style>.st0{fill:#fff;}</style></defs>
+        <g>
+          <path class="st0" d="M113.1,14h0c.2,0,.3-.2.3-.3v-5.7c-.1-.2-.3-.3-.5-.3-.2,0-.3.2-.3.3v5.7c.1.2.3.3.5.3Z"/>
+          <path class="st0" d="M111.5,16.5c0-.9.7-1.6,1.6-1.7s1.6.7,1.6,1.6-.7,1.6-1.6,1.7-1.6-.7-1.6-1.6ZM112.2,16.5c0,.5.4.9.9.9s.9-.4.9-1-.4-.9-.9-.9-.9.4-.9,1Z"/>
+          <path class="st0" d="M115.8,21.7l-2.6-2-2.6,2.1c-.1,0-.3,0-.4,0-.1,0-.2-.2-.2-.3l.4-3.3-3.1-1.3c-.1,0-.2-.2-.2-.3,0-.1,0-.3.2-.3l3-1.3-.4-3.4c0-.1,0-.3.2-.3.1,0,.3,0,.4,0l2.6,2,2.6-2.1c.1,0,.3,0,.4,0,.1,0,.2.2.2.3l-.4,3.3,3.1,1.3c.1,0,.2.2.2.3,0,.1,0,.3-.2.3l-3,1.3.4,3.4c0,.1,0,.3-.2.3,0,0-.1,0-.2,0s-.1,0-.2,0ZM115.3,15.4c-.1,0-.2-.2-.2-.4l.3-2.8-2.2,1.7c-.1,0-.3,0-.4,0l-2.2-1.7.4,2.8c0,.2,0,.3-.2.4l-2.5,1.1,2.6,1.1c.1,0,.2.2.2.4l-.3,2.8,2.2-1.7c.1,0,.3,0,.4,0l2.2,1.7-.4-2.8c0-.2,0-.3.2-.4l2.5-1.1-2.6-1.1Z"/>
+          <path class="st0" d="M113,10.8c0,0,.1,0,.2,0l1.5-1.2c.1-.1.2-.3,0-.5-.1-.2-.3-.2-.5,0l-1.3,1-1.4-1c-.2-.1-.4,0-.5,0-.1.2,0,.4,0,.5l1.6,1.2c0,0,.1,0,.2,0Z"/>
+          <path class="st0" d="M115.5,15.3c0,0,.1,0,.2,0l4.8-2.9c.2,0,.2-.3.1-.5,0-.2-.3-.2-.5-.1l-4.8,2.9c-.2,0-.2.3-.1.5,0,.1.2.2.3.2Z"/>
+          <path class="st0" d="M119.9,14.5c.1,0,.2,0,.3-.2,0-.2,0-.4-.2-.4l-1.5-.7.2-1.7c0-.2-.1-.4-.3-.4-.2,0-.3.1-.4.3l-.2,2c0,.1,0,.3.2.3l1.7.8s0,0,.1,0Z"/>
+          <path class="st0" d="M120.4,20.9c.1,0,.2,0,.3-.2,0-.2,0-.4-.1-.5l-4.9-2.7c-.2,0-.4,0-.5.1,0,.2,0,.4.1.5l4.9,2.7c0,0,.1,0,.2,0Z"/>
+          <path class="st0" d="M118.5,21.7s0,0,0,0c.2,0,.3-.2.3-.4l-.2-1.7,1.6-.7c.2,0,.2-.3.2-.5,0-.2-.3-.2-.4-.2l-1.8.8c-.1,0-.2.2-.2.3l.2,1.9c0,.2.2.3.3.3Z"/>
+          <path class="st0" d="M113.3,25.3h0c.2,0,.3-.2.3-.3v-5.7c-.1-.2-.3-.3-.5-.3h0c-.2,0-.3.2-.3.3v5.7c.1.2.3.3.5.3Z"/>
+          <path class="st0" d="M114.8,24c.1,0,.2,0,.3-.1.1-.2,0-.4,0-.5l-1.6-1.2c-.1,0-.3,0-.4,0l-1.5,1.2c-.1.1-.2.3,0,.5.1.2.3.2.5,0l1.3-1,1.4,1c0,0,.1,0,.2,0Z"/>
+          <path class="st0" d="M106,21.2c0,0,.1,0,.2,0l4.8-2.9c.2,0,.2-.3.1-.5,0-.2-.3-.2-.5-.1l-4.8,2.9c-.2,0-.2.3-.1.5,0,.1.2.2.3.2Z"/>
+          <path class="st0" d="M107.9,21.9c.2,0,.3-.1.3-.3l.2-2c0-.1,0-.3-.2-.3l-1.7-.8c-.2,0-.4,0-.4.2,0,.2,0,.4.2.4l1.5.7-.2,1.7c0,.2.1.4.3.4,0,0,0,0,0,0Z"/>
+          <path class="st0" d="M110.7,15.5c.1,0,.2,0,.3-.2,0-.2,0-.4-.1-.5l-4.9-2.7c-.2,0-.4,0-.5.1,0,.2,0,.4.1.5l4.9,2.7c0,0,.1,0,.2,0Z"/>
+          <g>
+            <path class="st0" d="M112.9,5.4c.4,0,.8.4.8.8s-.3.8-.8.8-.8-.4-.8-.8.3-.8.8-.8Z"/>
+            <path class="st0" d="M121.3,10.5c.4-.2.9-.1,1.1.3.1.2.1.4,0,.6,0,.2-.2.4-.4.5-.1,0-.3.1-.4.1s-.1,0-.2,0c-.2,0-.4-.2-.5-.4-.2-.4-.1-.9.3-1.1Z"/>
+            <path class="st0" d="M121.7,20.6c.2,0,.4,0,.6,0,.4.2.5.7.3,1.1-.1.2-.3.3-.5.4,0,0-.1,0-.2,0-.1,0-.3,0-.4-.1-.2-.1-.3-.3-.4-.5,0-.2,0-.4,0-.6.1-.2.3-.3.5-.4Z"/>
+            <path class="st0" d="M113.3,25.9c.4,0,.8.4.8.8s-.3.8-.8.8-.8-.4-.8-.8.3-.8.8-.8Z"/>
+            <path class="st0" d="M104.1,21.1c.2-.1.4-.1.6,0,.2,0,.4.2.5.4.2.4.1.9-.3,1.1-.1,0-.3.1-.4.1s-.1,0-.2,0c-.2,0-.4-.2-.5-.4-.1-.2-.1-.4,0-.6,0-.2.2-.4.4-.5Z"/>
+            <path class="st0" d="M104.5,12.3c0,0-.1,0-.2,0-.1,0-.3,0-.4-.1-.4-.2-.5-.7-.3-1.1.2-.4.7-.5,1.1-.3.4.2.5.7.3,1.1-.1.2-.3.3-.5.4Z"/>
+          </g>
+          <path class="st0" d="M106.2,14.7s0,0,.1,0l1.8-.8c.1,0,.2-.2.2-.3l-.2-1.9c0-.2-.2-.3-.4-.3-.2,0-.3.2-.3.4l.2,1.7-1.6.7c-.2,0-.2.3-.2.5,0,.1.2.2.3.2Z"/>
+        </g>
+        <g>
+          <path class="st0" d="M223.6,91.7L179.5,15.5c-.1-.2-1.9,3.2-2,3.4-23.9,42.8-17.4,53.2-39.6,17.1-.1-.2-.3-.2-.4,0l-22.1,28.2c-.2.3-.7,0-.5-.4l21.1-41.3c1.1-2.1,3.7-2.2,4.9-.1l13.6,23.8c.1.2.4.2.5,0L177.4,2.1c1.2-2.3,4.1-2.4,5.4-.1l41.1,87.4"/>
+          <path class="st0" d="M2.7,93L46.7,16.8c.1-.2,1.9,3.2,2,3.4,23.9,42.8,17.4,53.2,39.6,17.1.1-.2.3-.2.4,0l22.1,28.2c.2.3.7,0,.5-.4l-21.1-41.3c-1.1-2.1-3.7-2.2-4.9-.1l-13.6,23.8c-.1.2-.4.2-.5,0L48.9,3.5c-1.2-2.3-4.1-2.4-5.4-.1L2.4,90.7"/>
+        </g>
+        <g>
+          <path class="st0" d="M86.5,108.5h-.8l-.8-1.7h-4.1l-.7,1.7h-1l1.7-3.4,1.5-3.2h.5s.5,0,.5,0l1.6,3.4,1.6,3.2ZM84.3,105.6l-1.5-2.9-1.4,2.8-.2.5h3.3l-.2-.4Z"/>
+          <path class="st0" d="M91.1,106v-4c-.1,0,.7,0,.7,0h2.4c1.1,0,2,.2,2.6.8.6.6,1,1.4,1,2.4s-.3,1.9-1,2.5c-.7.6-1.6.9-2.8.8h-2.2s-.9,0-.9,0v-2.5ZM91.9,102.8v3.2c0,0,0,1.7,0,1.7h2.3c1,0,1.7-.2,2.3-.6.5-.4.8-1.1.8-1.9s-.3-1.3-.8-1.7c-.5-.4-1.2-.6-2.2-.6h-2.4Z"/>
+          <path class="st0" d="M103.7,105.6l-2-3.6h.9l1.7,3.3,1.4,2.3,1.2-2.4,1.5-3.2h1l-1.9,3.5-1.5,3h-.4s-.5,0-.5,0l-1.5-3Z"/>
+          <path class="st0" d="M114.3,108.5h-.4s.1-2.5.1-2.5v-4c-.1,0,.3,0,.3,0h.4s-.1,4-.1,4v2.5c.1,0-.3,0-.3,0Z"/>
+          <path class="st0" d="M123.5,108.7c-.7,0-1.3,0-1.9-.3-.6-.2-1.2-.5-1.7-.8l.4-.9c.5.4,1,.6,1.6.8.6.2,1.1.3,1.7.3s1.2-.1,1.6-.3c.4-.2.6-.5.6-.9s0-.4-.2-.6c-.2-.1-.4-.3-.8-.3-.1,0-.3,0-.5,0-.2,0-.5,0-1-.1-.6,0-1-.1-1.3-.2-.3,0-.5-.1-.7-.2-.4-.1-.7-.3-.9-.6-.2-.2-.3-.5-.3-.9,0-.6.3-1.1.8-1.4.5-.3,1.3-.5,2.2-.5s1,0,1.5.1,1,.3,1.4.5l-.4.9c-.5-.2-.9-.4-1.4-.5-.5-.1-1-.2-1.4-.2s-1.1,0-1.5.3c-.4.2-.6.5-.6.8s0,.4.2.5c.2.1.4.2.7.3.1,0,.3,0,.5,0s.5,0,.9,0c.6,0,1.1.1,1.3.2.3,0,.5.1.8.2.4.1.7.3.9.6.2.3.3.6.3,1,0,.6-.3,1.1-.8,1.5-.5.4-1.2.6-2.1.6Z"/>
+          <path class="st0" d="M134.5,108.7c-1.1,0-2-.3-2.7-.9s-1.1-1.5-1.1-2.5.3-1.9,1-2.5c.7-.6,1.6-.9,2.7-.9s2,.3,2.7.9c.7.6,1,1.5,1,2.5s-.4,1.9-1.1,2.5c-.7.6-1.6.9-2.7.9ZM134.5,102.6c-.9,0-1.7.2-2.3.7-.6.5-.9,1.1-.9,1.8s.3,1.5.9,2c.6.5,1.3.7,2.3.7s1.7-.2,2.3-.7c.6-.5.9-1.2.9-2s-.3-1.3-.9-1.8c-.6-.5-1.3-.7-2.3-.7Z"/>
+          <path class="st0" d="M145.8,108.5h-1s-1.2-2.2-1.2-2.2l-.4-.6h-2.8v2.8c.1,0-.3,0-.3,0h-.4s.1-2.5.1-2.5v-4c-.1,0,.7,0,.7,0h2.9c.9,0,1.5.1,1.9.4.4.3.6.8.6,1.4s-.2,1-.5,1.3c-.3.3-.8.5-1.4.6l.2.3,1.6,2.5ZM145.3,103.8c0-.4-.1-.7-.4-.8s-.9-.2-1.7-.2h-2.6v2.1c0,0,2.6,0,2.6,0,.8,0,1.4,0,1.7-.2.3-.2.5-.4.5-.8Z"/>
+        </g>
+        <g>
+          <path class="st0" d="M15.1,91.9h-.6s.4-3.2.4-3.2l.2-5.2h1.2s0,0,0,0l3.6,7.2h0l3.4-7.2h1.4l.2,5.2.4,3.2h-.6s-.7,0-.7,0v-3.2c0,0-.4-3.8-.4-3.8l-3.3,7h-.5s-.5,0-.5,0l-3.3-6.8-.3,3.6v3.2c0,0-.8,0-.8,0Z"/>
+          <path class="st0" d="M40.5,91.9h-1.1l-1-2.2h-5.2l-.9,2.2h-1.2l2.1-4.3,1.9-4.1h.7s.6,0,.6,0l2.1,4.4,2,4ZM37.7,88.1l-2-3.7-1.8,3.6-.3.6h4.2l-.2-.5Z"/>
+          <path class="st0" d="M54.2,91.9h-1.3s-1.5-2.8-1.5-2.8l-.5-.7h-3.6v3.6c.1,0-.4,0-.4,0h-.6s.1-3.2.1-3.2v-5.2c-.1,0,.9,0,.9,0h3.7c1.1,0,1.9.2,2.5.6.5.4.8,1,.8,1.8s-.2,1.2-.6,1.6c-.4.4-1,.7-1.8.8l.2.3,2.1,3.3ZM53.6,85.9c0-.5-.2-.8-.6-1-.4-.2-1.1-.3-2.2-.3h-3.4v2.7c0,0,3.4,0,3.4,0,1.1,0,1.8-.1,2.2-.3.4-.2.6-.6.6-1.1Z"/>
+          <path class="st0" d="M61.4,91.9h-.6s.1-3.2.1-3.2v-5.2c-.1,0,.4,0,.4,0h.6s-.1,5.1-.1,5.1v3.2c.1,0-.4,0-.4,0Z"/>
+          <path class="st0" d="M69.6,91.9h-.6s.1-3.2.1-3.2l-.2-5.2h1.2l6.3,7.1v-1.9s-.1-5.2-.1-5.2h.7s.6,0,.6,0v5.2c-.1,0,0,3.2,0,3.2h-1.2l-6.3-7.2v3.9c0,0,0,3.2,0,3.2h-.7Z"/>
+          <path class="st0" d="M92.9,91.9h-1.1l-1-2.2h-5.2l-.9,2.2h-1.2l2.1-4.3,1.9-4.1h.7s.6,0,.6,0l2.1,4.4,2,4ZM90.1,88.1l-2-3.7-1.8,3.6-.3.6h4.2l-.2-.5Z"/>
+          <path class="st0" d="M108.3,91.9h-.6s.4-3.2.4-3.2l.2-5.2h1.2s0,0,0,0l3.6,7.2h0l3.4-7.2h1.4l.2,5.2.4,3.2h-.6s-.7,0-.7,0v-3.2c0,0-.4-3.8-.4-3.8l-3.3,7h-.5s-.5,0-.5,0l-3.3-6.8-.3,3.6v3.2c0,0-.8,0-.8,0Z"/>
+          <path class="st0" d="M129.7,92.1c-1.4,0-2.6-.4-3.5-1.2s-1.4-1.9-1.4-3.2.4-2.4,1.3-3.2c.9-.8,2.1-1.2,3.5-1.2s2.6.4,3.5,1.2c.9.8,1.3,1.9,1.3,3.2s-.5,2.4-1.4,3.2-2.1,1.2-3.5,1.2ZM129.7,84.3c-1.2,0-2.2.3-2.9.9-.8.6-1.1,1.4-1.1,2.3s.4,2,1.1,2.6c.7.6,1.7.9,3,.9s2.2-.3,2.9-.9c.7-.6,1.1-1.5,1.1-2.6s-.4-1.7-1.1-2.3c-.8-.6-1.7-.9-2.9-.9Z"/>
+          <path class="st0" d="M144.8,92.1c-.8,0-1.6-.1-2.4-.3-.8-.2-1.5-.6-2.2-1.1l.5-1.2c.6.5,1.3.8,2,1.1.7.3,1.5.4,2.2.4s1.5-.1,2.1-.4c.5-.3.8-.7.8-1.1s-.1-.5-.3-.7-.5-.3-1-.4c-.2,0-.4,0-.7-.1-.3,0-.7,0-1.2-.1-.8,0-1.3-.1-1.7-.2s-.7-.1-.9-.2c-.5-.2-.9-.4-1.2-.7s-.4-.7-.4-1.1c0-.8.3-1.4,1-1.8s1.6-.6,2.9-.6,1.3,0,1.9.2c.6.1,1.2.3,1.8.6l-.5,1.1c-.6-.3-1.2-.5-1.8-.6s-1.2-.2-1.8-.2-1.5.1-1.9.4c-.5.3-.7.6-.7,1s0,.5.3.7.5.3.9.4c.2,0,.4,0,.6.1s.6,0,1.1.1c.8,0,1.4.1,1.7.2.4,0,.7.1,1,.2.5.2.9.4,1.2.8.3.3.4.7.4,1.2,0,.8-.3,1.5-1,1.9-.7.5-1.6.7-2.7.7Z"/>
+          <path class="st0" d="M155.4,91.9h-.6s.4-3.2.4-3.2l.2-5.2h1.2s0,0,0,0l3.6,7.2h0l3.4-7.2h1.4l.2,5.2.4,3.2h-.6s-.7,0-.7,0v-3.2c0,0-.4-3.8-.4-3.8l-3.3,7h-.5s-.5,0-.5,0l-3.3-6.8-.3,3.6v3.2c0,0-.8,0-.8,0Z"/>
+          <path class="st0" d="M180.8,91.9h-1.1l-1-2.2h-5.2l-.9,2.2h-1.2l2.1-4.3,1.9-4.1h.7s.6,0,.6,0l2.1,4.4,2,4ZM178.1,88.1l-2-3.7-1.8,3.6-.3.6h4.2l-.2-.5Z"/>
+          <path class="st0" d="M187.2,91.9h-.6s.1-3.2.1-3.2l-.2-5.2h1.2l6.3,7.1v-1.9s-.1-5.2-.1-5.2h.7s.6,0,.6,0v5.2c-.1,0,0,3.2,0,3.2h-1.2l-6.3-7.2v3.9c0,0,0,3.2,0,3.2h-.7Z"/>
+          <path class="st0" d="M202.9,91.9h-.6s.1-3.2.1-3.2l-.2-5.2h1.2l6.3,7.1v-1.9s-.1-5.2-.1-5.2h.7s.6,0,.6,0v5.2c-.1,0,0,3.2,0,3.2h-1.2l-6.3-7.2v3.9c0,0,0,3.2,0,3.2h-.7Z"/>
+        </g>
+      </svg>
 
-    function logError(msg) {
-      console.error(msg);
-      document.getElementById('output').textContent += '❌ ' + msg + '\n';
-    }
+      <p class="hero-tagline">Agencia de Turismo &amp; Excursiones en Bariloche</p>
 
-    // ── Step 1: Read URL params ──────────────────────────────
-    function getParams() {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      const gid = params.get('gid');
+      <div class="hero-meta">
+        <p>Presupuesto para: <span data-field="clientName">Cliente</span></p>
+        <p>Fecha: <span data-field="issueDate">--/--/----</span></p>
+        <p>Moneda: <span data-field="currencyLabel">--</span></p>
+      </div>
 
-      if (!id) {
-        logError('Missing required URL parameter: id (spreadsheet ID)');
-        logError('Usage: ?id=SPREADSHEET_ID&gid=SHEET_GID');
-        return null;
-      }
+    </div>
+  </header>
 
-      if (!gid) {
-        logError('Missing required URL parameter: gid (sheet tab ID)');
-        logError('Usage: ?id=SPREADSHEET_ID&gid=SHEET_GID');
-        return null;
-      }
+  <main>
 
-      const gidNum = parseInt(gid, 10);
-      if (isNaN(gidNum)) {
-        logError('Parameter gid must be a number. Got: "' + gid + '"');
-        return null;
-      }
+    <!-- ══ 2. RESUMEN ══════════════════════════════════════ -->
+    <section id="resumen" aria-label="Resumen del viaje">
+      <div class="resumen-card">
+        <span class="label">Resumen</span>
+        <p class="resumen-total-amount" data-field="grandTotal">$ 0</p>
 
-      log('✅ Params OK');
-      log('   id  = ' + id);
-      log('   gid = ' + gidNum);
+        <div class="resumen-stats">
+          <div class="resumen-stat">
+            <span class="label">Duración</span>
+            <span class="value" data-field="tripDays">0 Días</span>
+          </div>
+          <div class="resumen-stat">
+            <span class="label">Actividades</span>
+            <span class="value" data-field="totalActivities">0</span>
+          </div>
+        </div>
 
-      return { id, gid: gidNum };
-    }
+        <p class="resumen-passengers">
+          Pasajeros:&nbsp;<strong data-field="passengers">--</strong>
+        </p>
+      </div>
+    </section>
 
-    // ── Step 2: Fetch sheet metadata ─────────────────────────
-    async function fetchSheetMetadata(spreadsheetId) {
-      const url = SHEETS_API + '/' + spreadsheetId
-        + '?fields=sheets.properties'
-        + '&key=' + API_KEY;
+    <!-- ══ 3. ITINERARIO ═══════════════════════════════════ -->
+    <section id="itinerario" aria-label="Itinerario día a día">
+      <h2 class="section-title">Itinerario</h2>
 
-      log('\n📡 Fetching sheet metadata...');
-      log('   URL: ' + url);
+      <div class="timeline" id="timeline">
 
-      let response;
-      try {
-        response = await fetch(url);
-      } catch (err) {
-        logError('Network error fetching metadata: ' + err.message);
-        return null;
-      }
+        <!-- Default day (visible before JS runs or on error) -->
+        <article class="day-entry" id="default-day">
+          <div class="day-bubble" aria-hidden="true">1</div>
+          <div class="day-card">
+            <div class="day-card-header">
+              <span></span>
+              <span class="day-date">--/--/----</span>
+            </div>
+            <div class="activity">
+              <p class="activity-name">Cargando actividades...</p>
+              <ul class="pax-list">
+                <li class="pax-row">
+                  <span class="pax-label">Adultos</span>
+                  <span class="pax-calc">0 × $ 0</span>
+                  <span class="pax-total">= $ 0</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </article>
 
-      if (!response.ok) {
-        const body = await response.text();
-        logError('API error ' + response.status + ': ' + body);
-        return null;
-      }
+      </div><!-- /.timeline -->
+    </section>
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (err) {
-        logError('Failed to parse JSON response: ' + err.message);
-        return null;
-      }
+    <!-- ══ 4. PAGOS EXTRAS ═════════════════════════════════ -->
+    <section id="pagos-extras" aria-label="Pagos extras">
+      <div class="inner">
+        <h2 class="section-title">Pagos Extras</h2>
+        <p class="extras-note">Precios en pesos argentinos (ARS)</p>
+        <ul class="extras-list">
+          <li class="extras-item">
+            <span class="extras-desc">Tasas de embarque para excursiones desde puerto $5.500.- diaria</span>
+          </li>
+          <li class="extras-item">
+            <span class="extras-desc">Ingreso al Parque Nacional Extranjeros: $20.000.- Nacionales $7.000.-</span>
+          </li>
+          <li class="extras-item">
+            <span class="extras-desc">Ascensos en Cerro Campanario adultos $22.000.- menores $15.000.-</span>
+          </li>
+          <li class="extras-item">
+            <span class="extras-desc">Ascensos en Cerro Catedral tarifa única p/peatón: $36.000.-</span>
+          </li>
+          <li class="extras-item">
+            <span class="extras-desc">Ticket para pista ski tarifas (valor aproximado) $160.000.-</span>
+          </li>
+        </ul>
+      </div>
+    </section>
 
-      if (!data.sheets || !Array.isArray(data.sheets)) {
-        logError('Unexpected response shape — no sheets array found');
-        log('   Response: ' + JSON.stringify(data));
-        return null;
-      }
+    <!-- ══ 5. TOTAL FINAL ══════════════════════════════════ -->
+    <section id="total-final" aria-label="Total final">
+      <div class="total-final-card">
+        <span class="label">Presupuesto Total</span>
+        <p class="total-final-amount" data-field="grandTotalBottom">$ 0</p>
+      </div>
+    </section>
 
-      log('✅ Metadata received: ' + data.sheets.length + ' tab(s) found');
-      data.sheets.forEach(function(s) {
-        log('   [gid ' + s.properties.sheetId + '] "' + s.properties.title + '"');
-      });
+  </main>
 
-      return data.sheets;
-    }
+  <!-- ══ 6. FOOTER ═════════════════════════════════════════ -->
+  <footer>
+    <div class="footer-inner">
 
-    // ── Step 3: Resolve gid → tab name ───────────────────────
-    function resolveTabName(sheets, gid) {
-      log('\n🔍 Looking for gid ' + gid + '...');
+      <div class="footer-contact">
+        <div class="footer-contact-item">
+          <svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+          <a href="mailto:marina@marinamosmannadvisor.com">marina@marinamosmannadvisor.com</a>
+        </div>
+        <div class="footer-contact-item">
+          <svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 3.18 2 2 0 013.95 1H7a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <a href="https://wa.me/5492944516122">+54 9 2944 51-6122</a>
+        </div>
+        <div class="footer-contact-item">
+          <svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          <a href="https://marinamosmannadvisor.com" target="_blank" rel="noopener">marinamosmannadvisor.com</a>
+        </div>
+      </div>
 
-      const match = sheets.find(function(s) {
-        return s.properties.sheetId === gid;
-      });
+      <a
+        class="whatsapp-btn no-print"
+        id="whatsapp-link"
+        href="https://wa.me/5492944516122?text=Consulta%20sobre%20presupuesto"
+        target="_blank"
+        rel="noopener"
+        aria-label="Contactar por WhatsApp"
+      >
+        <svg class="whatsapp-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Contactar por WhatsApp
+      </a>
 
-      if (!match) {
-        logError('No tab found with gid ' + gid);
-        logError('Available gids: ' + sheets.map(function(s) {
-          return s.properties.sheetId;
-        }).join(', '));
-        return null;
-      }
+    </div>
+  </footer>
 
-      const tabName = match.properties.title;
-      log('✅ Resolved: gid ' + gid + ' → "' + tabName + '"');
+  <!-- ══ TEMPLATES (invisible, cloned by JS) ═══════════════ -->
 
-      return tabName;
-    }
+  <template id="tpl-day">
+    <article class="day-entry">
+      <div class="day-bubble" aria-hidden="true" data-field="dayNumber"></div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span></span>
+          <span class="day-date" data-field="dayDate"></span>
+        </div>
+        <!-- activities are appended here by JS -->
+      </div>
+    </article>
+  </template>
 
-    // ── Main ─────────────────────────────────────────────────
-    async function main() {
-      log('=== Phase 1: Data Loop Test ===\n');
+  <template id="tpl-activity">
+    <div class="activity">
+      <p class="activity-name" data-field="excursionName"></p>
+      <ul class="pax-list">
+        <!-- pax rows are appended here by JS -->
+      </ul>
+    </div>
+  </template>
 
-      // Step 1
-      const params = getParams();
-      if (!params) return;
+  <template id="tpl-pax-row">
+    <li class="pax-row">
+      <span class="pax-label" data-field="paxLabel"></span>
+      <span class="pax-calc" data-field="paxCalc"></span>
+      <span class="pax-total" data-field="paxTotal"></span>
+    </li>
+  </template>
 
-      // Step 2
-      const sheets = await fetchSheetMetadata(params.id);
-      if (!sheets) return;
+  <!-- ══ Error banner (hidden by default) ══════════════════ -->
+  <div id="error-banner" class="error-banner" hidden>
+    <p id="error-message"></p>
+  </div>
 
-      // Step 3
-      const tabName = resolveTabName(sheets, params.gid);
-      if (!tabName) return;
-
-      log('\n✅ Phase 1 complete. Ready for Phase 2 (data fetch).');
-      log('   Client name (tab): "' + tabName + '"');
-      log('   Next: fetch ' + tabName + '!A1:J11 + ' + tabName + '!P1');
-    }
-
-    main();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>

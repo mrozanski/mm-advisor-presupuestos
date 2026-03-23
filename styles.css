@@ -1,0 +1,574 @@
+/* ══════════════════════════════════════════════════════════
+   MM Advisors — Presupuesto de Viaje
+   Responsive estimate page styles
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy-dark:      #0D2952;
+  --navy-mid:       #1A3A6B;
+  --primary-blue:   #1E4FA0;
+  --body-dark:      #1A1A2E;
+  --white:          #FFFFFF;
+  --light-bg:       #F0F4FA;
+  --whatsapp-green: #25D366;
+  --muted:          #6B7A99;
+  --border:         #D0DAEA;
+  --card-shadow:    0 4px 24px rgba(13,41,82,0.12);
+  --font-numeric:   'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Digits and currency: Helvetica Neue aligns more cleanly than Raleway */
+.resumen-total-amount,
+.resumen-stat .value,
+.hero-meta [data-field="issueDate"],
+.hero-meta [data-field="currencyLabel"],
+.resumen-passengers strong,
+.day-bubble,
+.day-date,
+.pax-calc,
+.pax-total,
+.total-final-amount {
+  font-family: var(--font-numeric);
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'Raleway', Arial, sans-serif;
+  font-weight: 400;
+  color: var(--body-dark);
+  background: var(--light-bg);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+a { color: var(--primary-blue); text-decoration: underline; }
+a:hover { color: var(--navy-dark); }
+
+img, svg { display: block; max-width: 100%; }
+
+/* ── Typography Helpers ───────────────────────────────────── */
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--navy-dark);
+  margin-bottom: 20px;
+}
+
+/* ── Layout Wrappers ──────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   1. HEADER / HERO
+══════════════════════════════════════════════════════════ */
+header {
+  background: linear-gradient(135deg, #0D2952 0%, #1A3A6B 50%, #1E4FA0 100%);
+  padding: 36px 20px 80px;
+  position: relative;
+}
+
+.hero-inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.hero-logo {
+  display: block;
+  width: 160px;
+  margin: 0 auto 10px;
+}
+
+.hero-tagline {
+  text-align: center;
+  color: rgba(255,255,255,0.80);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  margin-bottom: 28px;
+}
+
+.hero-meta {
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 16px;
+}
+
+.hero-meta p {
+  color: rgba(255,255,255,0.90);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.hero-meta p span {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* ══════════════════════════════════════════════════════════
+   2. RESUMEN CARD
+══════════════════════════════════════════════════════════ */
+#resumen {
+  padding: 0 16px 0;
+  position: relative;
+  z-index: 10;
+}
+
+.resumen-card {
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 20px 20px 24px;
+  margin-top: -48px;
+  max-width: 608px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.resumen-total-amount {
+  font-size: 2.7rem;
+  font-weight: 700;
+  color: var(--navy-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 6px 0 16px;
+}
+
+.resumen-stats {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 0;
+  margin-bottom: 14px;
+}
+
+.resumen-stat {
+  flex: 1;
+  text-align: left;
+}
+
+.resumen-stat:last-child {
+  border-left: 1px solid var(--border);
+  padding-left: 20px;
+}
+
+.resumen-stat .label { display: block; margin-bottom: 4px; }
+
+.resumen-stat .value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.resumen-passengers {
+  font-size: 13px;
+  color: var(--body-dark);
+}
+
+.resumen-passengers strong {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ══════════════════════════════════════════════════════════
+   3. ITINERARIO SECTION
+══════════════════════════════════════════════════════════ */
+#itinerario {
+  padding: 32px 16px 8px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 56px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 8px;
+  bottom: 16px;
+  width: 2px;
+  background: var(--border);
+}
+
+.day-entry {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.day-bubble {
+  position: absolute;
+  left: -56px;
+  top: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--navy-dark);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(13,41,82,0.25);
+  z-index: 2;
+}
+
+.day-card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 14px 16px 16px;
+  box-shadow: 0 2px 12px rgba(13,41,82,0.08);
+  overflow: hidden;
+}
+
+.day-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.day-date {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+/* Activity block */
+.activity + .activity {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.activity-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy-dark);
+  margin-bottom: 8px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.activity-name a {
+  color: var(--primary-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.activity-name a:hover { color: var(--navy-dark); }
+
+.pax-list {
+  list-style: none;
+  margin-bottom: 8px;
+}
+
+.pax-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--body-dark);
+  padding: 2px 0;
+  gap: 8px;
+  overflow-wrap: break-word;
+}
+
+.pax-label { color: var(--muted); flex-shrink: 0; }
+.pax-calc { flex: 1; overflow-wrap: break-word; }
+.pax-total { font-weight: 600; color: var(--navy-dark); white-space: nowrap; }
+
+/* Activity subtotal — SUPPRESSED for MVP (uncomment later) */
+.activity-subtotal {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.activity-subtotal .subtotal-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.activity-subtotal .subtotal-amount {
+  font-weight: 700;
+  color: var(--navy-dark);
+  font-size: 14px;
+}
+
+/* Day total — SUPPRESSED for MVP (uncomment later) */
+.day-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 2px solid var(--navy-dark);
+}
+
+.day-total-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--navy-mid);
+}
+
+.day-total-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy-dark);
+}
+
+/* ══════════════════════════════════════════════════════════
+   4. PAGOS EXTRAS
+══════════════════════════════════════════════════════════ */
+#pagos-extras {
+  background: var(--light-bg);
+  padding: 28px 16px;
+  margin-top: 8px;
+}
+
+#pagos-extras .inner {
+  max-width: 608px;
+  margin: 0 auto;
+}
+
+.extras-note {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.extras-list {
+  list-style: none;
+}
+
+.extras-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+  overflow-wrap: break-word;
+}
+
+.extras-item:first-child { border-top: 1px solid var(--border); }
+
+.extras-desc {
+  color: var(--body-dark);
+  flex: 1;
+  overflow-wrap: break-word;
+}
+
+/* ══════════════════════════════════════════════════════════
+   5. TOTAL FINAL
+══════════════════════════════════════════════════════════ */
+#total-final {
+  padding: 28px 16px;
+}
+
+.total-final-card {
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 20px 20px 24px;
+  max-width: 608px;
+  margin: 0 auto;
+  border-top: 4px solid var(--navy-dark);
+}
+
+.total-final-amount {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--navy-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-top: 6px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   6. FOOTER
+══════════════════════════════════════════════════════════ */
+footer {
+  background: var(--navy-dark);
+  padding: 28px 16px 32px;
+  color: var(--white);
+}
+
+.footer-inner {
+  max-width: 608px;
+  margin: 0 auto;
+}
+
+.footer-contact {
+  margin-bottom: 20px;
+}
+
+.footer-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+}
+
+.footer-contact-item a {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+}
+
+.footer-contact-item a:hover {
+  color: var(--white);
+  text-decoration: underline;
+}
+
+.footer-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.whatsapp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  background: var(--whatsapp-green);
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+  padding: 14px 20px;
+  transition: background 0.15s;
+}
+
+.whatsapp-btn:hover {
+  background: #1ebe5a;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.whatsapp-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ERROR BANNER
+══════════════════════════════════════════════════════════ */
+.error-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #D32F2F;
+  color: var(--white);
+  padding: 14px 20px;
+  font-size: 13px;
+  text-align: center;
+  z-index: 1000;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.2);
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE — Tablet & Desktop
+══════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  header { padding: 48px 32px 88px; }
+
+  .hero-logo { width: 180px; }
+
+  .resumen-card,
+  .total-final-card {
+    padding: 28px 32px 32px;
+  }
+
+  .resumen-total-amount,
+  .total-final-amount { font-size: 52px; }
+
+  #itinerario { padding: 40px 32px 8px; }
+  #pagos-extras { padding: 36px 32px; }
+  #total-final { padding: 32px 32px; }
+
+  footer { padding: 36px 32px 40px; }
+
+  .day-card { padding: 16px 20px 20px; }
+
+  .activity-name { font-size: 15px; }
+  .pax-row { font-size: 14px; }
+}
+
+@media (min-width: 1024px) {
+  .container,
+  .hero-inner,
+  .resumen-card,
+  .total-final-card,
+  #itinerario,
+  #pagos-extras .inner,
+  .footer-inner {
+    max-width: 720px;
+  }
+
+  .hero-tagline { font-size: 14px; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   PRINT
+══════════════════════════════════════════════════════════ */
+@media print {
+  body { background: white; color: black; }
+  .no-print { display: none !important; }
+  .error-banner { display: none !important; }
+  header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .day-card { page-break-inside: avoid; }
+  .resumen-card, .total-final-card { page-break-inside: avoid; }
+  footer { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}

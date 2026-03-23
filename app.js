@@ -118,16 +118,22 @@
 
   /**
    * Format a date value from the sheet as DD/MM/YYYY.
+   * Sheet authors use DD/MM/YYYY; do not use Date(string) for "12/07/…" — JS parses that as MM/DD/YYYY.
    */
   function formatDate(val) {
     if (!val) return '--/--/----';
-    // Google Sheets API may return dates as "Date(2026,6,12)" serial or as strings
+    var s = String(val).trim();
     var d;
-    var serial = String(val).match(/^Date\((\d+),(\d+),(\d+)\)$/);
+    var serial = s.match(/^Date\((\d+),(\d+),(\d+)\)$/);
     if (serial) {
-      d = new Date(parseInt(serial[1]), parseInt(serial[2]), parseInt(serial[3]));
+      d = new Date(parseInt(serial[1], 10), parseInt(serial[2], 10), parseInt(serial[3], 10));
     } else {
-      d = new Date(val);
+      var dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (dmy) {
+        d = new Date(parseInt(dmy[3], 10), parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
+      } else {
+        d = new Date(val);
+      }
     }
     if (isNaN(d.getTime())) return String(val);
     var dd = String(d.getDate()).padStart(2, '0');

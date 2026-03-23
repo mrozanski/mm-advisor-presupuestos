@@ -172,7 +172,7 @@ header {
 .resumen-stat .label { display: block; margin-bottom: 4px; }
 
 .resumen-stat .value {
-  font-size: 18px;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--navy-dark);
   text-transform: uppercase;
@@ -180,7 +180,7 @@ header {
 }
 
 .resumen-passengers {
-  font-size: 13px;
+  font-size: 0.8rem;
   color: var(--body-dark);
 }
 

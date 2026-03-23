@@ -92,27 +92,39 @@
   }
 
   /**
-   * Detect currency from an array of cell values.
-   * Scans price columns for currency symbols.
+   * Detect currency from sheet rows.
+   * Scans unit-price columns E, G, I (4,6,8) and TOTAL column J (9). The API often
+   * returns plain numbers in unit columns while J still shows "USD200" / "R$560" —
+   * scanning only 4/6/8 made everything fall back to DEFAULT (R$) and looked
+   * "always R$". We scan all, then pick USD > ARS > R$ if multiple hints appear.
    */
   function detectCurrency(rows) {
+    var hasUsd = false;
+    var hasArs = false;
+    var hasRs = false;
+    var priceCols = [4, 6, 8, 9];
+
     for (var i = 0; i < rows.length; i++) {
       var row = rows[i];
-      // Check columns E (4), G (6), I (8) — unit price columns
-      var priceCols = [4, 6, 8];
       for (var j = 0; j < priceCols.length; j++) {
         var cell = row[priceCols[j]];
-        if (!cell) continue;
+        if (cell === null || cell === undefined || cell === '') continue;
         var str = String(cell).trim();
-        if (str.indexOf('R$') !== -1) return CURRENCY_MAP['R$'];
-        // Production sheets use "USD40" (no $); detect before U$S / bare $
-        if (/^USD/i.test(str) || str.indexOf('USD') !== -1) return CURRENCY_MAP['USD'];
-        if (str.indexOf('U$S') !== -1) return CURRENCY_MAP['USD'];
+        if (!str) continue;
+
+        if (str.indexOf('R$') !== -1) hasRs = true;
+        if (/^USD/i.test(str) || str.indexOf('USD') !== -1) hasUsd = true;
+        if (str.indexOf('U$S') !== -1) hasUsd = true;
+        if (str.indexOf('ARS') !== -1) hasArs = true;
         if (str.indexOf('$') !== -1 && str.indexOf('R$') === -1 && str.indexOf('U$S') === -1) {
-          return CURRENCY_MAP['ARS'];
+          hasArs = true;
         }
       }
     }
+
+    if (hasUsd) return CURRENCY_MAP['USD'];
+    if (hasArs) return CURRENCY_MAP['ARS'];
+    if (hasRs) return CURRENCY_MAP['R$'];
     return DEFAULT_CURRENCY;
   }
 
@@ -276,7 +288,8 @@
     var range = encodedTab + '!A1:J' + DATA_END_ROW;
     var url = SHEETS_API + '/' + spreadsheetId
       + '/values/' + range
-      + '?key=' + API_KEY;
+      + '?valueRenderOption=FORMATTED_VALUE'
+      + '&key=' + API_KEY;
 
     console.log('[Presupuesto] Fetching data: ' + tabName + '!A1:J' + DATA_END_ROW);
 

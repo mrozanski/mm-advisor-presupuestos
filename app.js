@@ -117,29 +117,58 @@
   }
 
   /**
-   * Format a date value from the sheet as DD/MM/YYYY.
+   * Parse a sheet date cell to a local Date, or null if not parseable.
    * Sheet authors use DD/MM/YYYY; do not use Date(string) for "12/07/…" — JS parses that as MM/DD/YYYY.
    */
-  function formatDate(val) {
-    if (!val) return '--/--/----';
+  function parseSheetDate(val) {
+    if (val === null || val === undefined) return null;
     var s = String(val).trim();
+    if (!s) return null;
     var d;
     var serial = s.match(/^Date\((\d+),(\d+),(\d+)\)$/);
     if (serial) {
       d = new Date(parseInt(serial[1], 10), parseInt(serial[2], 10), parseInt(serial[3], 10));
-    } else {
-      var dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-      if (dmy) {
-        d = new Date(parseInt(dmy[3], 10), parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
-      } else {
-        d = new Date(val);
-      }
+      return isNaN(d.getTime()) ? null : d;
     }
-    if (isNaN(d.getTime())) return String(val);
+    var dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (dmy) {
+      d = new Date(parseInt(dmy[3], 10), parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
+      return isNaN(d.getTime()) ? null : d;
+    }
+    d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  /**
+   * Format a date value from the sheet as DD/MM/YYYY.
+   */
+  function formatDate(val) {
+    if (!val) return '--/--/----';
+    var d = parseSheetDate(val);
+    if (!d) return String(val);
     var dd = String(d.getDate()).padStart(2, '0');
     var mm = String(d.getMonth() + 1).padStart(2, '0');
     var yyyy = d.getFullYear();
     return dd + '/' + mm + '/' + yyyy;
+  }
+
+  /**
+   * Min–max date range across activities (DD/MM/YYYY - DD/MM/YYYY), or placeholder if none.
+   */
+  function buildTripDateRange(activities) {
+    var times = [];
+    for (var i = 0; i < activities.length; i++) {
+      var d = parseSheetDate(activities[i].date);
+      if (d) times.push(d.getTime());
+    }
+    if (times.length === 0) return '--/--/---- - --/--/----';
+    var minT = Math.min.apply(null, times);
+    var maxT = Math.max.apply(null, times);
+    function fmt(ms) {
+      var x = new Date(ms);
+      return String(x.getDate()).padStart(2, '0') + '/' + String(x.getMonth() + 1).padStart(2, '0') + '/' + x.getFullYear();
+    }
+    return fmt(minT) + ' - ' + fmt(maxT);
   }
 
   /**
@@ -346,7 +375,7 @@
       dayGroups: dayGroups,
       grandTotal: grandTotal,
       tripDays: tripDays,
-      totalActivities: activities.length,
+      tripDateRange: buildTripDateRange(activities),
       passengers: {
         adults: maxAdults,
         minors: maxMinors,
@@ -361,6 +390,7 @@
     var curr = data.currency;
 
     // Header meta
+    setField('budgetLabel', curr.locale === 'pt-BR' ? 'Orçamento para:' : 'Presupuesto para:');
     setField('clientName', data.clientName);
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
@@ -371,7 +401,7 @@
     // Resumen card
     setField('grandTotal', fmtAmount(data.grandTotal, curr));
     setField('tripDays', data.tripDays + ' Días');
-    setField('totalActivities', String(data.totalActivities));
+    setField('tripDateRange', data.tripDateRange);
     setField('passengers', buildPassengerString(
       data.passengers.adults, data.passengers.minors, data.passengers.infants
     ));

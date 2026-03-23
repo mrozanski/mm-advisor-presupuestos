@@ -7,16 +7,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --navy-dark:      #0D2952;
-  --navy-mid:       #1A3A6B;
-  --primary-blue:   #1E4FA0;
+  --navy-dark:      #03045E;
+  --primary-blue:   #023D89;
   --body-dark:      #1A1A2E;
   --white:          #FFFFFF;
   --light-bg:       #F0F4FA;
   --whatsapp-green: #25D366;
   --muted:          #6B7A99;
   --border:         #D0DAEA;
-  --card-shadow:    0 4px 24px rgba(13,41,82,0.12);
+  --card-shadow:    0 4px 24px color-mix(in srgb, var(--navy-dark) 12%, transparent);
   --font-numeric:   'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -81,7 +80,7 @@ img, svg { display: block; max-width: 100%; }
    1. HEADER / HERO
 ══════════════════════════════════════════════════════════ */
 header {
-  background: linear-gradient(135deg, #0D2952 0%, #1A3A6B 50%, #1E4FA0 100%);
+  background: linear-gradient(135deg, var(--navy-dark) 0%, var(--primary-blue) 100%);
   padding: 36px 20px 80px;
   position: relative;
 }
@@ -119,7 +118,7 @@ header {
 
 .hero-meta p span {
   font-weight: 600;
-  color: #ffffff;
+  color: var(--white);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -236,7 +235,7 @@ header {
   font-weight: 700;
   font-size: 14px;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(13,41,82,0.25);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--navy-dark) 25%, transparent);
   z-index: 2;
 }
 
@@ -244,7 +243,7 @@ header {
   background: var(--white);
   border-radius: 10px;
   padding: 14px 16px 16px;
-  box-shadow: 0 2px 12px rgba(13,41,82,0.08);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--navy-dark) 8%, transparent);
   overflow: hidden;
 }
 
@@ -347,7 +346,7 @@ header {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--navy-mid);
+  color: var(--primary-blue);
 }
 
 .day-total-amount {

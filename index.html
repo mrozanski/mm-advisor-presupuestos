@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presupuesto — MM Advisors (Phase 1 Test)</title>
+</head>
+<body>
+  <h1>Phase 1 — Data Loop Test</h1>
+  <pre id="output" style="white-space: pre-wrap; font-family: monospace; padding: 16px; background: #f5f5f5; border-radius: 8px;"></pre>
+
+  <script>
+    // ── Configuration ────────────────────────────────────────
+    const API_KEY = 'AIzaSyAPM00wGH79nT0bIvAXSb3TDMMcnULjydU';
+    const SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
+
+    // ── Helpers ──────────────────────────────────────────────
+    function log(msg) {
+      console.log(msg);
+      document.getElementById('output').textContent += msg + '\n';
+    }
+
+    function logError(msg) {
+      console.error(msg);
+      document.getElementById('output').textContent += '❌ ' + msg + '\n';
+    }
+
+    // ── Step 1: Read URL params ──────────────────────────────
+    function getParams() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      const gid = params.get('gid');
+
+      if (!id) {
+        logError('Missing required URL parameter: id (spreadsheet ID)');
+        logError('Usage: ?id=SPREADSHEET_ID&gid=SHEET_GID');
+        return null;
+      }
+
+      if (!gid) {
+        logError('Missing required URL parameter: gid (sheet tab ID)');
+        logError('Usage: ?id=SPREADSHEET_ID&gid=SHEET_GID');
+        return null;
+      }
+
+      const gidNum = parseInt(gid, 10);
+      if (isNaN(gidNum)) {
+        logError('Parameter gid must be a number. Got: "' + gid + '"');
+        return null;
+      }
+
+      log('✅ Params OK');
+      log('   id  = ' + id);
+      log('   gid = ' + gidNum);
+
+      return { id, gid: gidNum };
+    }
+
+    // ── Step 2: Fetch sheet metadata ─────────────────────────
+    async function fetchSheetMetadata(spreadsheetId) {
+      const url = SHEETS_API + '/' + spreadsheetId
+        + '?fields=sheets.properties'
+        + '&key=' + API_KEY;
+
+      log('\n📡 Fetching sheet metadata...');
+      log('   URL: ' + url);
+
+      let response;
+      try {
+        response = await fetch(url);
+      } catch (err) {
+        logError('Network error fetching metadata: ' + err.message);
+        return null;
+      }
+
+      if (!response.ok) {
+        const body = await response.text();
+        logError('API error ' + response.status + ': ' + body);
+        return null;
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        logError('Failed to parse JSON response: ' + err.message);
+        return null;
+      }
+
+      if (!data.sheets || !Array.isArray(data.sheets)) {
+        logError('Unexpected response shape — no sheets array found');
+        log('   Response: ' + JSON.stringify(data));
+        return null;
+      }
+
+      log('✅ Metadata received: ' + data.sheets.length + ' tab(s) found');
+      data.sheets.forEach(function(s) {
+        log('   [gid ' + s.properties.sheetId + '] "' + s.properties.title + '"');
+      });
+
+      return data.sheets;
+    }
+
+    // ── Step 3: Resolve gid → tab name ───────────────────────
+    function resolveTabName(sheets, gid) {
+      log('\n🔍 Looking for gid ' + gid + '...');
+
+      const match = sheets.find(function(s) {
+        return s.properties.sheetId === gid;
+      });
+
+      if (!match) {
+        logError('No tab found with gid ' + gid);
+        logError('Available gids: ' + sheets.map(function(s) {
+          return s.properties.sheetId;
+        }).join(', '));
+        return null;
+      }
+
+      const tabName = match.properties.title;
+      log('✅ Resolved: gid ' + gid + ' → "' + tabName + '"');
+
+      return tabName;
+    }
+
+    // ── Main ─────────────────────────────────────────────────
+    async function main() {
+      log('=== Phase 1: Data Loop Test ===\n');
+
+      // Step 1
+      const params = getParams();
+      if (!params) return;
+
+      // Step 2
+      const sheets = await fetchSheetMetadata(params.id);
+      if (!sheets) return;
+
+      // Step 3
+      const tabName = resolveTabName(sheets, params.gid);
+      if (!tabName) return;
+
+      log('\n✅ Phase 1 complete. Ready for Phase 2 (data fetch).');
+      log('   Client name (tab): "' + tabName + '"');
+      log('   Next: fetch ' + tabName + '!A1:J11 + ' + tabName + '!P1');
+    }
+
+    main();
+  </script>
+</body>
+</html>

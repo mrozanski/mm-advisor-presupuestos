@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instalar botón de Presupuesto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Raleway', Arial, sans-serif;
+      background: #F0F4FA;
+      color: #1A1A2E;
+      line-height: 1.7;
+      padding: 40px 20px;
+    }
+    .card {
+      max-width: 560px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(13,41,82,0.12);
+      padding: 32px 28px;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #03045E;
+      margin-bottom: 20px;
+    }
+    .step {
+      margin-bottom: 20px;
+      padding-left: 36px;
+      position: relative;
+    }
+    .step-number {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #03045E;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .step p {
+      font-size: 14px;
+    }
+    .bookmarklet-link {
+      display: inline-block;
+      background: #023D89;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: grab;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(2,61,137,0.3);
+      transition: background 0.15s;
+    }
+    .bookmarklet-link:hover {
+      background: #03045E;
+    }
+    .bookmarklet-link:active {
+      cursor: grabbing;
+    }
+    .demo-bar {
+      background: #f5f5f5;
+      border: 2px dashed #D0DAEA;
+      border-radius: 8px;
+      padding: 14px 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #6B7A99;
+      margin: 16px 0;
+    }
+    .note {
+      font-size: 12px;
+      color: #6B7A99;
+      font-style: italic;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Instalar botón de Presupuesto</h1>
+
+    <div class="step">
+      <span class="step-number">1</span>
+      <p>Asegurate de que la <strong>barra de marcadores</strong> esté visible en Chrome. Si no la ves, presioná <strong>Ctrl+Shift+B</strong> (o Cmd+Shift+B en Mac).</p>
+    </div>
+
+    <div class="step">
+      <span class="step-number">2</span>
+      <p><strong>Arrastrá</strong> este botón hacia tu barra de marcadores:</p>
+    </div>
+
+    <p style="text-align: center;">
+      <a class="bookmarklet-link"
+         href="javascript:void(function(){var m=location.pathname.match(/\/d\/([^\/]+)/),g=location.hash.match(/gid=(\d+)/);if(m&&g)window.open('https://mrozanski.github.io/mm-advisor-presupuestos/?id='+m[1]+'&gid='+g[1]);else alert('Abrí una pestaña de Google Sheets primero')})()">
+        📋 Presupuesto
+      </a>
+    </p>
+
+    <div class="demo-bar">
+      ↑ Arrastrá el botón azul a tu barra de marcadores ↑
+    </div>
+
+    <div class="step">
+      <span class="step-number">3</span>
+      <p>Listo. Ahora cuando estés en una planilla de presupuesto en Google Sheets, hacé clic en <strong>📋 Presupuesto</strong> en tu barra de marcadores y se abre la vista para el cliente.</p>
+    </div>
+
+    <p class="note">
+      Solo funciona desde Google Sheets. Si hacés clic desde otra página, te avisa que primero abras una planilla.
+    </p>
+  </div>
+</body>
+</html>

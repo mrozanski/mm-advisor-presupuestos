@@ -403,7 +403,7 @@
     var curr = data.currency;
 
     // Header meta
-    setField('budgetLabel', curr.locale === 'pt-BR' ? 'Orçamento para:' : 'Presupuesto para:');
+    setField('budgetLabel', curr === CURRENCY_MAP['R$'] ? 'Orçamento para:' : 'Presupuesto para:');
     setField('clientName', data.clientName);
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');

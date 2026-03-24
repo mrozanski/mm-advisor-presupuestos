@@ -425,7 +425,7 @@ header {
 }
 
 .total-final-amount {
-  font-size: 42px;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--navy-dark);
   letter-spacing: -0.02em;

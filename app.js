@@ -5,11 +5,12 @@
  * ══════════════════════════════════════════════════════════
  *
  * Flow:
- * 1. Read URL params (id, gid)
- * 2. Fetch sheet metadata → resolve gid to tab name
- * 3. Fetch sheet data (A1:J10; row 1 header, rows 2–10 activities — top sheet row removed)
- * 4. Parse activities, detect currency, compute totals
- * 5. Populate DOM from templates
+ * 1. Optional: if local fixture is allowed and test-data/response.json loads, use it (no Google API)
+ * 2. Else: read URL params (id, gid)
+ * 3. Fetch sheet metadata → resolve gid to tab name
+ * 4. Fetch sheet data (A1:K18; row 1 header, rows 2–18 activities; issue date in K5)
+ * 5. Parse activities, detect currency, compute totals
+ * 6. Populate DOM from templates
  *
  * On any failure, the page keeps its default layout with $0 values
  * and shows an error banner at the bottom.
@@ -21,7 +22,9 @@
   // ── Configuration ────────────────────────────────────────
   var API_KEY = 'AIzaSyAPM00wGH79nT0bIvAXSb3TDMMcnULjydU';
   var SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
-  var DATA_END_ROW = 18; // rows 2–18 contain activities (row 1 is header);
+  var DATA_END_ROW = 18; // rows 2–18: activities (row 1 is header); K5 = issue date (rows[4][10])
+  /** Relative to index.html; only loaded when shouldAttemptLocalFixture() is true (see below). */
+  var LOCAL_FIXTURE_PATH = 'test-data/response.json';
 
   // ── Currency config ──────────────────────────────────────
   var CURRENCY_MAP = {
@@ -323,9 +326,68 @@
     return data.values;
   }
 
+  // ── Local test fixture (no Google API / avoids browser CORS to Sheets) ──
+
+  /**
+   * Only try to load the JSON fixture on localhost or when ?local=1 (so production
+   * does not silently use test-data if the file is deployed).
+   */
+  function shouldAttemptLocalFixture() {
+    var h = location.hostname;
+    if (h === 'localhost' || h === '127.0.0.1' || h === '[::1]') return true;
+    if (new URLSearchParams(location.search).get('local') === '1') return true;
+    return false;
+  }
+
+  /**
+   * Parse tab title from Sheets API range string, e.g. 'My Tab'!A1:K18
+   */
+  function tabNameFromRange(rangeStr) {
+    if (!rangeStr || typeof rangeStr !== 'string') return 'Presupuesto';
+    var bang = rangeStr.indexOf('!');
+    if (bang === -1) return 'Presupuesto';
+    var q = rangeStr.slice(0, bang);
+    if (q.charAt(0) !== "'" || q.charAt(q.length - 1) !== "'") return 'Presupuesto';
+    var inner = q.slice(1, -1).replace(/''/g, "'");
+    return inner.trim() || 'Presupuesto';
+  }
+
+  /**
+   * @returns {Promise<{ values: Array, tabName: string }|null>}
+   */
+  async function tryLoadLocalFixture() {
+    if (!shouldAttemptLocalFixture()) return null;
+    var response;
+    try {
+      response = await fetch(LOCAL_FIXTURE_PATH, { cache: 'no-store' });
+    } catch (err) {
+      return null;
+    }
+    if (!response.ok) return null;
+    var data;
+    try {
+      data = await response.json();
+    } catch (err) {
+      console.warn('[Presupuesto] Local fixture: invalid JSON');
+      return null;
+    }
+    if (!data.values || !Array.isArray(data.values) || data.values.length === 0) {
+      console.warn('[Presupuesto] Local fixture: missing or empty values');
+      return null;
+    }
+    return {
+      values: data.values,
+      tabName: tabNameFromRange(data.range)
+    };
+  }
+
   // ── Step 4: Parse data ───────────────────────────────────
 
   function parseEstimateData(rows, tabName) {
+    // Issue date: column K, sheet row 5 → index [4][10] (may share row with an activity)
+    var issueRaw = rows[4] && rows[4][10];
+    var issueDateDisplay = formatDate(issueRaw);
+
     // Row 0 is the header, rows 1+ are activities
     var activityRows = rows.slice(1);
     var currency = detectCurrency(activityRows);
@@ -384,6 +446,7 @@
     return {
       clientName: tabName,
       currency: currency,
+      issueDateDisplay: issueDateDisplay,
       activities: activities,
       dayGroups: dayGroups,
       grandTotal: grandTotal,
@@ -405,10 +468,7 @@
     // Header meta
     setField('budgetLabel', curr === CURRENCY_MAP['R$'] ? 'Orçamento para:' : 'Presupuesto para:');
     setField('clientName', data.clientName);
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0');
-    setField('issueDate', dd + '/' + mm + '/' + today.getFullYear());
+    setField('issueDate', data.issueDateDisplay);
     setField('currencyLabel', curr.label);
 
     // Resumen card
@@ -505,6 +565,15 @@
   // ── Main ─────────────────────────────────────────────────
 
   async function main() {
+    var local = await tryLoadLocalFixture();
+    if (local) {
+      console.log('[Presupuesto] Local test mode — ' + LOCAL_FIXTURE_PATH + ' (tab: "' + local.tabName + '")');
+      var dataLocal = parseEstimateData(local.values, local.tabName);
+      console.log('[Presupuesto] Parsed:', dataLocal);
+      populateDOM(dataLocal);
+      return;
+    }
+
     // Step 1: URL params
     var params = getParams();
     if (!params) return;

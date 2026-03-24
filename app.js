@@ -21,7 +21,7 @@
   // ── Configuration ────────────────────────────────────────
   var API_KEY = 'AIzaSyAPM00wGH79nT0bIvAXSb3TDMMcnULjydU';
   var SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
-  var DATA_END_ROW = 10; // rows 2–10 contain activities (row 1 is header); was 11 before a top row was removed from the sheet
+  var DATA_END_ROW = 18; // rows 2–18 contain activities (row 1 is header);
 
   // ── Currency config ──────────────────────────────────────
   var CURRENCY_MAP = {
@@ -285,13 +285,13 @@
     // Encode tab name for URL (handles spaces, special chars)
     var encodedTab = encodeURIComponent(tabName);
 
-    var range = encodedTab + '!A1:J' + DATA_END_ROW;
+    var range = encodedTab + '!A1:K' + DATA_END_ROW;
     var url = SHEETS_API + '/' + spreadsheetId
       + '/values/' + range
       + '?valueRenderOption=FORMATTED_VALUE'
       + '&key=' + API_KEY;
 
-    console.log('[Presupuesto] Fetching data: ' + tabName + '!A1:J' + DATA_END_ROW);
+    console.log('[Presupuesto] Fetching data: ' + tabName + '!A1:K' + DATA_END_ROW);
 
     var response;
     try {

@@ -107,8 +107,8 @@
 
     <p style="text-align: center;">
       <a class="bookmarklet-link"
-         href="javascript:void(function(){var m=location.pathname.match(/\/d\/([^\/]+)/),g=location.hash.match(/gid=(\d+)/);if(m&&g)window.open('https://mrozanski.github.io/mm-advisor-presupuestos/?id='+m[1]+'&gid='+g[1]);else alert('Abrí una pestaña de Google Sheets primero')})()">
-        📋 Presupuesto
+         href="javascript:void(function(){var m=location.pathname.match(/\/d\/([^\/]+)/),g=location.hash.match(/gid=(\d+)/);if(!m||!g){alert('Abrí una pestaña de Google Sheets primero');return}var u='https://mrozanski.github.io/mm-advisor-presupuestos/?id='+m[1]+'&amp;gid='+g[1];var t=document.createElement('textarea');t.value=u;t.setAttribute('readonly','');t.style.position='fixed';t.style.left='-9999px';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(t);if(navigator.clipboard&amp;&amp;navigator.clipboard.writeText)navigator.clipboard.writeText(u);window.open(u)})()">
+        📋 Ver/Copiar Presupuesto
       </a>
     </p>
 
@@ -118,7 +118,7 @@
 
     <div class="step">
       <span class="step-number">3</span>
-      <p>Listo. Ahora cuando estés en una planilla de presupuesto en Google Sheets, hacé clic en <strong>📋 Presupuesto</strong> en tu barra de marcadores y se abre la vista para el cliente.</p>
+      <p>Listo. Ahora cuando estés en una planilla de presupuesto en Google Sheets, hacé clic en <strong>📋 Presupuesto</strong> en tu barra de marcadores: se abre la vista para el cliente y el enlace (que empieza con <code>https://mrozanski.github.io</code>) queda copiado al portapapeles para que lo pegues donde quieras.</p>
     </div>
 
     <p class="note">

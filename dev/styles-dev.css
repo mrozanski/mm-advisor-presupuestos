@@ -1,0 +1,11 @@
+/* Dev preview: activity links (v2 sheets) — loaded after ../styles.css */
+
+.activity-name a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.activity-name a:hover {
+  opacity: 0.88;
+}

@@ -1,11 +1,23 @@
 /* Dev preview: activity links (v2 sheets) — loaded after ../styles.css */
 
-.activity-name a {
+.activity-name a.activity-name-link {
   color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
+  text-decoration: none;
 }
 
-.activity-name a:hover {
-  opacity: 0.88;
+.activity-name a.activity-name-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.activity-name .activity-link-icon {
+  display: inline;
+  white-space: nowrap;
+}
+
+.activity-name .activity-link-icon svg {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.12em;
 }

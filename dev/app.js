@@ -572,7 +572,14 @@
             a.href = activity.url;
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
-            a.textContent = activity.excursion;
+            a.className = 'activity-name-link';
+            a.appendChild(document.createTextNode(activity.excursion));
+            a.appendChild(document.createTextNode(' '));
+            var iconWrap = document.createElement('span');
+            iconWrap.className = 'activity-link-icon';
+            iconWrap.setAttribute('aria-hidden', 'true');
+            iconWrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+            a.appendChild(iconWrap);
             nameEl.appendChild(a);
           } else {
             nameEl.textContent = activity.excursion;

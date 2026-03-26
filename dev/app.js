@@ -1,10 +1,16 @@
 /**
- * MM Advisors — Presupuesto App (dev preview)
+ * MM Advisors — Presupuesto App
+ * Client-side data fetch + DOM population
  *
- * Same UX as root app.js with:
- * - batchGet: grid A1:L{DATA_END_ROW} + version cell Z1
- * - Sheet layout v1 (legacy A–K) vs v2 (URL column D, data through L)
- * - Optional activity links when URL is https
+ * Flow:
+ * 1. Optional local fixture (test-data/*.json) on localhost or ?local=1
+ * 2. URL params id, gid → resolve tab name → batchGet grid A1:L{DATA_END_ROW} + Z1
+ * 3. Layout v1 (legacy A–K) vs v2 (URL column D, semver in Z1 or header heuristic)
+ * 4. Parse, populate DOM; v2 activities may show title + external-link icon
+ *
+ * On failure, default layout remains with error banner.
+ *
+ * Dev copy: open /dev/index.html; local fixtures use ../test-data/ relative to this file.
  */
 
 (function () {
@@ -13,9 +19,9 @@
   var API_KEY = 'AIzaSyAPM00wGH79nT0bIvAXSb3TDMMcnULjydU';
   var SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
   var DATA_END_ROW = 18;
-  /** Local fixture: parent test-data (served from repo root when using local server). */
+  /** Relative to dev/index.html (repo root has test-data/). */
   var LOCAL_FIXTURE_PATH = '../test-data/response.json';
-  /** Optional v2 sample with URL column + sheetVersion (see test-data/response-v2-dev.json). */
+  /** Optional v2 sample (URL column + sheetVersion simulating Z1). */
   var LOCAL_FIXTURE_V2_PATH = '../test-data/response-v2-dev.json';
 
   var CURRENCY_MAP = {
@@ -29,7 +35,7 @@
   var DEFAULT_CURRENCY = CURRENCY_MAP['R$'];
 
   function showError(msg) {
-    console.error('[Presupuesto dev] ' + msg);
+    console.error('[Presupuesto] ' + msg);
     var banner = document.getElementById('error-banner');
     var msgEl = document.getElementById('error-message');
     if (banner && msgEl) {
@@ -174,7 +180,7 @@
       return null;
     }
 
-    console.log('[Presupuesto dev] Params: id=' + id + ', gid=' + gidNum);
+    console.log('[Presupuesto] Params: id=' + id + ', gid=' + gidNum);
     return { id: id, gid: gidNum };
   }
 
@@ -183,7 +189,7 @@
       + '?fields=sheets.properties'
       + '&key=' + API_KEY;
 
-    console.log('[Presupuesto dev] Fetching metadata...');
+    console.log('[Presupuesto] Fetching metadata...');
 
     var response;
     try {
@@ -230,7 +236,7 @@
       return null;
     }
 
-    console.log('[Presupuesto dev] Tab resolved: gid ' + gid + ' → "' + match + '"');
+    console.log('[Presupuesto] Tab resolved: gid ' + gid + ' → "' + match + '"');
     return match;
   }
 
@@ -294,7 +300,7 @@
       + '&valueRenderOption=FORMATTED_VALUE'
       + '&key=' + API_KEY;
 
-    console.log('[Presupuesto dev] batchGet: ' + gridRangeStr + ' + ' + versionRangeStr);
+    console.log('[Presupuesto] batchGet: ' + gridRangeStr + ' + ' + versionRangeStr);
 
     var response;
     try {
@@ -333,7 +339,7 @@
       }
     }
 
-    console.log('[Presupuesto dev] Received grid rows: ' + gridRows.length + ', Z1: ' + String(versionRaw));
+    console.log('[Presupuesto] Received grid rows: ' + gridRows.length + ', Z1: ' + String(versionRaw));
     return { gridRows: gridRows, versionRaw: versionRaw };
   }
 
@@ -381,7 +387,7 @@
       try {
         data = await response.json();
       } catch (err) {
-        console.warn('[Presupuesto dev] Local fixture invalid JSON: ' + path);
+        console.warn('[Presupuesto] Local fixture invalid JSON: ' + path);
         continue;
       }
 
@@ -394,7 +400,7 @@
           ver = data.valueRanges[1].values[0][0];
         }
         var tr = data.valueRanges[0].range || '';
-        console.log('[Presupuesto dev] Local batch fixture: ' + path);
+        console.log('[Presupuesto] Local batch fixture: ' + path);
         return {
           gridRows: gr,
           tabName: tabNameFromRange(tr),
@@ -407,7 +413,7 @@
         var versionRaw = data.sheetVersion !== undefined && data.sheetVersion !== null
           ? data.sheetVersion
           : null;
-        console.log('[Presupuesto dev] Local fixture: ' + path + ' (tab: "' + tabNameFromRange(data.range) + '")');
+        console.log('[Presupuesto] Local fixture: ' + path + ' (tab: "' + tabNameFromRange(data.range) + '")');
         return {
           gridRows: data.values,
           tabName: tabNameFromRange(data.range),
@@ -542,7 +548,7 @@
     var tplPaxRow = document.getElementById('tpl-pax-row');
 
     if (!timeline || !tplDay || !tplActivity || !tplPaxRow) {
-      console.error('[Presupuesto dev] Missing template elements');
+      console.error('[Presupuesto] Missing template elements');
       return;
     }
 
@@ -615,16 +621,16 @@
       timeline.appendChild(dayEl);
     });
 
-    console.log('[Presupuesto dev] DOM populated (layout ' + data.layout + ')');
+    console.log('[Presupuesto] DOM populated (layout ' + data.layout + ')');
   }
 
   async function main() {
     var local = await tryLoadLocalFixture();
     if (local) {
       var layout = resolveLayout(local.gridRows, local.versionRaw);
-      console.log('[Presupuesto dev] Local mode — layout: ' + layout + ', version cell: ' + String(local.versionRaw));
+      console.log('[Presupuesto] Local mode — layout: ' + layout + ', version cell: ' + String(local.versionRaw));
       var dataLocal = parseEstimateData(local.gridRows, local.tabName, layout);
-      console.log('[Presupuesto dev] Parsed:', dataLocal);
+      console.log('[Presupuesto] Parsed:', dataLocal);
       populateDOM(dataLocal);
       return;
     }
@@ -639,10 +645,10 @@
     if (!fetched) return;
 
     var layout = resolveLayout(fetched.gridRows, fetched.versionRaw);
-    console.log('[Presupuesto dev] Layout: ' + layout + ', Z1: ' + String(fetched.versionRaw));
+    console.log('[Presupuesto] Layout: ' + layout + ', Z1: ' + String(fetched.versionRaw));
 
     var data = parseEstimateData(fetched.gridRows, tabName, layout);
-    console.log('[Presupuesto dev] Parsed:', data);
+    console.log('[Presupuesto] Parsed:', data);
 
     populateDOM(data);
   }

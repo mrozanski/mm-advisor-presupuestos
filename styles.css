@@ -287,13 +287,28 @@ header {
   word-break: break-word;
 }
 
-.activity-name a {
-  color: var(--primary-blue);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+/* v2 sheet URLs: title matches plain text; .activity-name-link + icon from app.js */
+.activity-name a.activity-name-link {
+  color: inherit;
+  text-decoration: none;
 }
 
-.activity-name a:hover { color: var(--navy-dark); }
+.activity-name a.activity-name-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.activity-name .activity-link-icon {
+  display: inline;
+  white-space: nowrap;
+}
+
+.activity-name .activity-link-icon svg {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.12em;
+}
 
 .pax-list {
   list-style: none;

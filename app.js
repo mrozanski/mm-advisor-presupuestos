@@ -1,32 +1,27 @@
 /**
- * ══════════════════════════════════════════════════════════
  * MM Advisors — Presupuesto App
  * Client-side data fetch + DOM population
- * ══════════════════════════════════════════════════════════
  *
  * Flow:
- * 1. Optional: if local fixture is allowed and test-data/response.json loads, use it (no Google API)
- * 2. Else: read URL params (id, gid)
- * 3. Fetch sheet metadata → resolve gid to tab name
- * 4. Fetch sheet data (A1:K18; row 1 header, rows 2–18 activities; issue date in K5)
- * 5. Parse activities, detect currency, compute totals
- * 6. Populate DOM from templates
+ * 1. Optional local fixture (test-data/*.json) on localhost or ?local=1
+ * 2. URL params id, gid → resolve tab name → batchGet grid A1:L{DATA_END_ROW} + Z1
+ * 3. Layout v1 (legacy A–K) vs v2 (URL column D, semver in Z1 or header heuristic)
+ * 4. Parse, populate DOM; v2 activities may show title + external-link icon
  *
- * On any failure, the page keeps its default layout with $0 values
- * and shows an error banner at the bottom.
+ * On failure, default layout remains with error banner.
  */
 
 (function () {
   'use strict';
 
-  // ── Configuration ────────────────────────────────────────
   var API_KEY = 'AIzaSyAPM00wGH79nT0bIvAXSb3TDMMcnULjydU';
   var SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
-  var DATA_END_ROW = 18; // rows 2–18: activities (row 1 is header); K5 = issue date (rows[4][10])
-  /** Relative to index.html; only loaded when shouldAttemptLocalFixture() is true (see below). */
+  var DATA_END_ROW = 18;
+  /** Relative to index.html at site root. */
   var LOCAL_FIXTURE_PATH = 'test-data/response.json';
+  /** Optional v2 sample (URL column + sheetVersion simulating Z1). */
+  var LOCAL_FIXTURE_V2_PATH = 'test-data/response-v2-dev.json';
 
-  // ── Currency config ──────────────────────────────────────
   var CURRENCY_MAP = {
     'R$':  { symbol: 'R$',  label: 'R$ (Reais)',           locale: 'pt-BR' },
     'USD': { symbol: 'U$S', label: 'USD (Dólares)',        locale: 'pt-BR' },
@@ -37,12 +32,6 @@
 
   var DEFAULT_CURRENCY = CURRENCY_MAP['R$'];
 
-  // ── Helpers ──────────────────────────────────────────────
-
-  /**
-   * Show an error banner at the bottom of the page.
-   * Does not throw — the page stays in its default state.
-   */
   function showError(msg) {
     console.error('[Presupuesto] ' + msg);
     var banner = document.getElementById('error-banner');
@@ -53,18 +42,12 @@
     }
   }
 
-  /**
-   * Set text content of the first element matching [data-field="name"].
-   */
   function setField(name, value, root) {
     var scope = root || document;
     var el = scope.querySelector('[data-field="' + name + '"]');
     if (el) el.textContent = value;
   }
 
-  /**
-   * Format a number as currency.
-   */
   function fmtAmount(num, curr) {
     if (!num && num !== 0) return curr.symbol + ' 0';
     return curr.symbol + ' ' + num.toLocaleString(curr.locale, {
@@ -73,11 +56,6 @@
     });
   }
 
-  /**
-   * Parse a cell value to a number, stripping currency prefixes and thousands separators.
-   * Supports R$80, R$1.610, R$1,610, USD40, USD1,380, U$S… (whole amounts in cells).
-   * Do not strip "USD" per-character (old /[R$U$S]/ removed U+S and turned "USD40" into "D40").
-   */
   function parseNum(val) {
     if (val === null || val === undefined || val === '') return 0;
     if (typeof val === 'number') return val;
@@ -88,24 +66,19 @@
       .replace(/^ARS\s*/i, '')
       .replace(/^\$\s*/, '');
     s = s.replace(/\s/g, '');
-    // Thousands: remove . and , (cells use integers; e.g. USD1,380 → 1380, R$1.610 → 1610)
     s = s.replace(/\./g, '').replace(/,/g, '');
     var n = parseFloat(s);
     return isNaN(n) ? 0 : n;
   }
 
   /**
-   * Detect currency from sheet rows.
-   * Scans unit-price columns E, G, I (4,6,8) and TOTAL column J (9). The API often
-   * returns plain numbers in unit columns while J still shows "USD200" / "R$560" —
-   * scanning only 4/6/8 made everything fall back to DEFAULT (R$) and looked
-   * "always R$". We scan all, then pick USD > ARS > R$ if multiple hints appear.
+   * @param {'v1'|'v2'} layout
    */
-  function detectCurrency(rows) {
+  function detectCurrency(rows, layout) {
+    var priceCols = layout === 'v2' ? [5, 7, 9, 10] : [4, 6, 8, 9];
     var hasUsd = false;
     var hasArs = false;
     var hasRs = false;
-    var priceCols = [4, 6, 8, 9];
 
     for (var i = 0; i < rows.length; i++) {
       var row = rows[i];
@@ -131,10 +104,6 @@
     return DEFAULT_CURRENCY;
   }
 
-  /**
-   * Parse a sheet date cell to a local Date, or null if not parseable.
-   * Sheet authors use DD/MM/YYYY; do not use Date(string) for "12/07/…" — JS parses that as MM/DD/YYYY.
-   */
   function parseSheetDate(val) {
     if (val === null || val === undefined) return null;
     var s = String(val).trim();
@@ -154,9 +123,6 @@
     return isNaN(d.getTime()) ? null : d;
   }
 
-  /**
-   * Format a date value from the sheet as DD/MM/YYYY.
-   */
   function formatDate(val) {
     if (!val) return '--/--/----';
     var d = parseSheetDate(val);
@@ -167,9 +133,6 @@
     return dd + '/' + mm + '/' + yyyy;
   }
 
-  /**
-   * Min–max date range across activities (DD/MM/YYYY - DD/MM/YYYY), or placeholder if none.
-   */
   function buildTripDateRange(activities) {
     var times = [];
     for (var i = 0; i < activities.length; i++) {
@@ -186,9 +149,6 @@
     return fmt(minT) + ' - ' + fmt(maxT);
   }
 
-  /**
-   * Build passenger string from max counts.
-   */
   function buildPassengerString(adults, minors, infants) {
     var parts = [];
     if (adults > 0) parts.push(adults + ' adulto' + (adults !== 1 ? 's' : ''));
@@ -196,8 +156,6 @@
     if (infants > 0) parts.push(infants + ' infante' + (infants !== 1 ? 's' : ''));
     return parts.length > 0 ? parts.join(', ') : '--';
   }
-
-  // ── Step 1: Read URL params ──────────────────────────────
 
   function getParams() {
     var params = new URLSearchParams(window.location.search);
@@ -223,8 +181,6 @@
     console.log('[Presupuesto] Params: id=' + id + ', gid=' + gidNum);
     return { id: id, gid: gidNum };
   }
-
-  // ── Step 2: Fetch sheet metadata ─────────────────────────
 
   async function fetchTabName(spreadsheetId, gid) {
     var url = SHEETS_API + '/' + spreadsheetId
@@ -282,19 +238,67 @@
     return match;
   }
 
-  // ── Step 3: Fetch sheet data ─────────────────────────────
+  /**
+   * Parse semver from Z1 (e.g. v2.0.0). Returns null if missing/invalid.
+   */
+  function parseSheetVersion(cell) {
+    if (cell === null || cell === undefined) return null;
+    var s = String(cell).trim();
+    if (!s) return null;
+    s = s.replace(/^v\s*/i, '');
+    var m = s.match(/^(\d+)\.(\d+)\.(\d+)/);
+    if (!m) return null;
+    return {
+      major: parseInt(m[1], 10),
+      minor: parseInt(m[2], 10),
+      patch: parseInt(m[3], 10)
+    };
+  }
 
+  function headerLooksLikeV2(rows) {
+    if (!rows || !rows[0]) return false;
+    var h = rows[0][3];
+    if (h === null || h === undefined) return false;
+    var t = String(h).trim().toLowerCase();
+    return t.indexOf('url') !== -1;
+  }
+
+  /**
+   * @returns {'v1'|'v2'}
+   */
+  function resolveLayout(rows, versionRaw) {
+    var v = parseSheetVersion(versionRaw);
+    if (v && v.major >= 2) return 'v2';
+    if (rows && headerLooksLikeV2(rows)) return 'v2';
+    return 'v1';
+  }
+
+  function isSafeHttpUrl(s) {
+    if (!s || typeof s !== 'string') return false;
+    var t = s.trim();
+    try {
+      var u = new URL(t);
+      return u.protocol === 'https:' || u.protocol === 'http:';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * batchGet: grid A1:L{DATA_END_ROW} + Z1 (column Z exists in all sheets; AA may error on narrow grids)
+   * @returns {Promise<{ gridRows: Array, versionRaw: * }|null>}
+   */
   async function fetchSheetData(spreadsheetId, tabName) {
-    // Encode tab name for URL (handles spaces, special chars)
-    var encodedTab = encodeURIComponent(tabName);
-
-    var range = encodedTab + '!A1:K' + DATA_END_ROW;
+    var gridRangeStr = tabName + '!A1:L' + DATA_END_ROW;
+    var versionRangeStr = tabName + '!Z1';
     var url = SHEETS_API + '/' + spreadsheetId
-      + '/values/' + range
-      + '?valueRenderOption=FORMATTED_VALUE'
+      + '/values:batchGet'
+      + '?ranges=' + encodeURIComponent(gridRangeStr)
+      + '&ranges=' + encodeURIComponent(versionRangeStr)
+      + '&valueRenderOption=FORMATTED_VALUE'
       + '&key=' + API_KEY;
 
-    console.log('[Presupuesto] Fetching data: ' + tabName + '!A1:K' + DATA_END_ROW);
+    console.log('[Presupuesto] batchGet: ' + gridRangeStr + ' + ' + versionRangeStr);
 
     var response;
     try {
@@ -317,21 +321,26 @@
       return null;
     }
 
-    if (!data.values || !Array.isArray(data.values)) {
+    if (!data.valueRanges || !Array.isArray(data.valueRanges) || data.valueRanges.length === 0) {
       showError('La planilla no contiene datos en el rango esperado.');
       return null;
     }
 
-    console.log('[Presupuesto] Received ' + data.values.length + ' rows');
-    return data.values;
+    var grid = data.valueRanges[0];
+    var gridRows = grid.values && Array.isArray(grid.values) ? grid.values : [];
+
+    var versionRaw = null;
+    if (data.valueRanges.length > 1) {
+      var vr = data.valueRanges[1];
+      if (vr && vr.values && vr.values[0] && vr.values[0][0] !== undefined && vr.values[0][0] !== '') {
+        versionRaw = vr.values[0][0];
+      }
+    }
+
+    console.log('[Presupuesto] Received grid rows: ' + gridRows.length + ', Z1: ' + String(versionRaw));
+    return { gridRows: gridRows, versionRaw: versionRaw };
   }
 
-  // ── Local test fixture (no Google API / avoids browser CORS to Sheets) ──
-
-  /**
-   * Only try to load the JSON fixture on localhost or when ?local=1 (so production
-   * does not silently use test-data if the file is deployed).
-   */
   function shouldAttemptLocalFixture() {
     var h = location.hostname;
     if (h === 'localhost' || h === '127.0.0.1' || h === '[::1]') return true;
@@ -339,9 +348,6 @@
     return false;
   }
 
-  /**
-   * Parse tab title from Sheets API range string, e.g. 'My Tab'!A1:K18
-   */
   function tabNameFromRange(rangeStr) {
     if (!rangeStr || typeof rangeStr !== 'string') return 'Presupuesto';
     var bang = rangeStr.indexOf('!');
@@ -353,72 +359,121 @@
   }
 
   /**
-   * @returns {Promise<{ values: Array, tabName: string }|null>}
+   * @returns {Promise<{ gridRows: Array, tabName: string, versionRaw: * }|null>}
    */
-  async function tryLoadLocalFixture() {
-    if (!shouldAttemptLocalFixture()) return null;
-    var response;
-    try {
-      response = await fetch(LOCAL_FIXTURE_PATH, { cache: 'no-store' });
-    } catch (err) {
-      return null;
-    }
-    if (!response.ok) return null;
-    var data;
-    try {
-      data = await response.json();
-    } catch (err) {
-      console.warn('[Presupuesto] Local fixture: invalid JSON');
-      return null;
-    }
-    if (!data.values || !Array.isArray(data.values) || data.values.length === 0) {
-      console.warn('[Presupuesto] Local fixture: missing or empty values');
-      return null;
-    }
-    return {
-      values: data.values,
-      tabName: tabNameFromRange(data.range)
-    };
+  function localFixturePaths() {
+    var v = new URLSearchParams(location.search).get('fixture');
+    if (v === 'v2') return [LOCAL_FIXTURE_V2_PATH, LOCAL_FIXTURE_PATH];
+    return [LOCAL_FIXTURE_PATH, LOCAL_FIXTURE_V2_PATH];
   }
 
-  // ── Step 4: Parse data ───────────────────────────────────
+  async function tryLoadLocalFixture() {
+    if (!shouldAttemptLocalFixture()) return null;
 
-  function parseEstimateData(rows, tabName) {
-    // Issue date: column K, sheet row 5 → index [4][10] (may share row with an activity)
-    var issueRaw = rows[4] && rows[4][10];
+    var tryPaths = localFixturePaths();
+    for (var p = 0; p < tryPaths.length; p++) {
+      var path = tryPaths[p];
+      var response;
+      try {
+        response = await fetch(path, { cache: 'no-store' });
+      } catch (err) {
+        continue;
+      }
+      if (!response.ok) continue;
+
+      var data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.warn('[Presupuesto] Local fixture invalid JSON: ' + path);
+        continue;
+      }
+
+      // batch-shaped fixture
+      if (data.valueRanges && Array.isArray(data.valueRanges) && data.valueRanges.length > 0) {
+        var gr = data.valueRanges[0].values;
+        if (!gr || !Array.isArray(gr) || gr.length === 0) continue;
+        var ver = null;
+        if (data.valueRanges.length > 1 && data.valueRanges[1].values && data.valueRanges[1].values[0]) {
+          ver = data.valueRanges[1].values[0][0];
+        }
+        var tr = data.valueRanges[0].range || '';
+        console.log('[Presupuesto] Local batch fixture: ' + path);
+        return {
+          gridRows: gr,
+          tabName: tabNameFromRange(tr),
+          versionRaw: ver
+        };
+      }
+
+      // flat values + optional sheetVersion (simulates Z1)
+      if (data.values && Array.isArray(data.values) && data.values.length > 0) {
+        var versionRaw = data.sheetVersion !== undefined && data.sheetVersion !== null
+          ? data.sheetVersion
+          : null;
+        console.log('[Presupuesto] Local fixture: ' + path + ' (tab: "' + tabNameFromRange(data.range) + '")');
+        return {
+          gridRows: data.values,
+          tabName: tabNameFromRange(data.range),
+          versionRaw: versionRaw
+        };
+      }
+    }
+
+    return null;
+  }
+
+  function parseEstimateData(rows, tabName, layout) {
+    var issueCol = layout === 'v2' ? 11 : 10;
+    var issueRaw = rows[4] && rows[4][issueCol];
     var issueDateDisplay = formatDate(issueRaw);
 
-    // Row 0 is the header, rows 1+ are activities
     var activityRows = rows.slice(1);
-    var currency = detectCurrency(activityRows);
+    var currency = detectCurrency(activityRows, layout);
 
     var activities = [];
     for (var i = 0; i < activityRows.length; i++) {
       var row = activityRows[i];
-      // Skip empty rows (column C = excursion name is empty)
       var excursion = (row[2] || '').toString().trim();
       if (!excursion) continue;
 
-      activities.push({
-        day: row[0] || '',
-        date: row[1] || '',
-        excursion: excursion,
-        adultsQty: parseNum(row[3]),
-        adultsPrice: parseNum(row[4]),
-        minorsQty: parseNum(row[5]),
-        minorsPrice: parseNum(row[6]),
-        infantsQty: parseNum(row[7]),
-        infantsPrice: parseNum(row[8]),
-        totalExcursion: parseNum(row[9])
-      });
+      if (layout === 'v2') {
+        var rawUrl = row[3];
+        var urlStr = rawUrl !== null && rawUrl !== undefined ? String(rawUrl).trim() : '';
+        activities.push({
+          day: row[0] || '',
+          date: row[1] || '',
+          excursion: excursion,
+          url: isSafeHttpUrl(urlStr) ? urlStr : '',
+          adultsQty: parseNum(row[4]),
+          adultsPrice: parseNum(row[5]),
+          minorsQty: parseNum(row[6]),
+          minorsPrice: parseNum(row[7]),
+          infantsQty: parseNum(row[8]),
+          infantsPrice: parseNum(row[9]),
+          totalExcursion: parseNum(row[10])
+        });
+      } else {
+        activities.push({
+          day: row[0] || '',
+          date: row[1] || '',
+          excursion: excursion,
+          url: '',
+          adultsQty: parseNum(row[3]),
+          adultsPrice: parseNum(row[4]),
+          minorsQty: parseNum(row[5]),
+          minorsPrice: parseNum(row[6]),
+          infantsQty: parseNum(row[7]),
+          infantsPrice: parseNum(row[8]),
+          totalExcursion: parseNum(row[9])
+        });
+      }
     }
 
-    // Grand total: sum of all activity totals
     var grandTotal = activities.reduce(function (sum, a) {
       return sum + a.totalExcursion;
     }, 0);
 
-    // Passenger counts: max per category
     var maxAdults = 0, maxMinors = 0, maxInfants = 0;
     activities.forEach(function (a) {
       if (a.adultsQty > maxAdults) maxAdults = a.adultsQty;
@@ -426,7 +481,6 @@
       if (a.infantsQty > maxInfants) maxInfants = a.infantsQty;
     });
 
-    // Group by day
     var dayMap = {};
     activities.forEach(function (a) {
       var key = String(a.day);
@@ -440,7 +494,6 @@
       .sort(function (a, b) { return parseInt(a) - parseInt(b); })
       .map(function (key) { return dayMap[key]; });
 
-    // Unique days count
     var tripDays = dayGroups.length;
 
     return {
@@ -452,6 +505,7 @@
       grandTotal: grandTotal,
       tripDays: tripDays,
       tripDateRange: buildTripDateRange(activities),
+      layout: layout,
       passengers: {
         adults: maxAdults,
         minors: maxMinors,
@@ -460,18 +514,14 @@
     };
   }
 
-  // ── Step 5: Populate DOM ─────────────────────────────────
-
   function populateDOM(data) {
     var curr = data.currency;
 
-    // Header meta
     setField('budgetLabel', curr === CURRENCY_MAP['R$'] ? 'Orçamento para:' : 'Presupuesto para:');
     setField('clientName', data.clientName);
     setField('issueDate', data.issueDateDisplay);
     setField('currencyLabel', curr.label);
 
-    // Resumen card
     setField('grandTotal', fmtAmount(data.grandTotal, curr));
     setField('tripDays', data.tripDays + ' Días');
     setField('tripDateRange', data.tripDateRange);
@@ -479,20 +529,16 @@
       data.passengers.adults, data.passengers.minors, data.passengers.infants
     ));
 
-    // Total final (bottom)
     setField('grandTotalBottom', fmtAmount(data.grandTotal, curr));
 
-    // WhatsApp link with client name
     var waLink = document.getElementById('whatsapp-link');
     if (waLink) {
       waLink.href = 'https://wa.me/5492944516122?text='
         + encodeURIComponent('Consulta sobre presupuesto de ' + data.clientName);
     }
 
-    // Page title
     document.title = 'Presupuesto — ' + data.clientName + ' — Marina Mosmann Advisor';
 
-    // ── Build itinerary from templates ──
     var timeline = document.getElementById('timeline');
     var defaultDay = document.getElementById('default-day');
     var tplDay = document.getElementById('tpl-day');
@@ -504,11 +550,9 @@
       return;
     }
 
-    // Remove default day placeholder
     if (defaultDay) defaultDay.remove();
 
     data.dayGroups.forEach(function (group) {
-      // Clone day template
       var dayEl = tplDay.content.cloneNode(true);
       var dayBubble = dayEl.querySelector('[data-field="dayNumber"]');
       var dayDate = dayEl.querySelector('[data-field="dayDate"]');
@@ -517,19 +561,35 @@
       if (dayBubble) dayBubble.textContent = group.day;
       if (dayDate) dayDate.textContent = formatDate(group.date);
 
-      // Set aria-label on the article
       var article = dayEl.querySelector('.day-entry');
       if (article) article.setAttribute('aria-label', 'Día ' + group.day);
 
-      // Add activities to the day card
       group.activities.forEach(function (activity) {
         var actEl = tplActivity.content.cloneNode(true);
         var nameEl = actEl.querySelector('[data-field="excursionName"]');
         var paxList = actEl.querySelector('.pax-list');
 
-        if (nameEl) nameEl.textContent = activity.excursion;
+        if (nameEl) {
+          nameEl.textContent = '';
+          if (activity.url) {
+            var a = document.createElement('a');
+            a.href = activity.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'activity-name-link';
+            a.appendChild(document.createTextNode(activity.excursion));
+            a.appendChild(document.createTextNode(' '));
+            var iconWrap = document.createElement('span');
+            iconWrap.className = 'activity-link-icon';
+            iconWrap.setAttribute('aria-hidden', 'true');
+            iconWrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+            a.appendChild(iconWrap);
+            nameEl.appendChild(a);
+          } else {
+            nameEl.textContent = activity.excursion;
+          }
+        }
 
-        // Pax rows
         var paxTypes = [
           { label: 'Adultos', qty: activity.adultsQty, price: activity.adultsPrice },
           { label: 'Menores', qty: activity.minorsQty, price: activity.minorsPrice },
@@ -559,42 +619,38 @@
       timeline.appendChild(dayEl);
     });
 
-    console.log('[Presupuesto] DOM populated successfully');
+    console.log('[Presupuesto] DOM populated (layout ' + data.layout + ')');
   }
-
-  // ── Main ─────────────────────────────────────────────────
 
   async function main() {
     var local = await tryLoadLocalFixture();
     if (local) {
-      console.log('[Presupuesto] Local test mode — ' + LOCAL_FIXTURE_PATH + ' (tab: "' + local.tabName + '")');
-      var dataLocal = parseEstimateData(local.values, local.tabName);
+      var layout = resolveLayout(local.gridRows, local.versionRaw);
+      console.log('[Presupuesto] Local mode — layout: ' + layout + ', version cell: ' + String(local.versionRaw));
+      var dataLocal = parseEstimateData(local.gridRows, local.tabName, layout);
       console.log('[Presupuesto] Parsed:', dataLocal);
       populateDOM(dataLocal);
       return;
     }
 
-    // Step 1: URL params
     var params = getParams();
     if (!params) return;
 
-    // Step 2: Resolve gid → tab name
     var tabName = await fetchTabName(params.id, params.gid);
     if (!tabName) return;
 
-    // Step 3: Fetch sheet data
-    var rows = await fetchSheetData(params.id, tabName);
-    if (!rows) return;
+    var fetched = await fetchSheetData(params.id, tabName);
+    if (!fetched) return;
 
-    // Step 4: Parse
-    var data = parseEstimateData(rows, tabName);
+    var layout = resolveLayout(fetched.gridRows, fetched.versionRaw);
+    console.log('[Presupuesto] Layout: ' + layout + ', Z1: ' + String(fetched.versionRaw));
+
+    var data = parseEstimateData(fetched.gridRows, tabName, layout);
     console.log('[Presupuesto] Parsed:', data);
 
-    // Step 5: Populate DOM
     populateDOM(data);
   }
 
-  // ── Init ─────────────────────────────────────────────────
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', main);
   } else {

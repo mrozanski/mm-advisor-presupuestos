@@ -2,7 +2,7 @@
  * MM Advisors — Presupuesto App (dev preview)
  *
  * Same UX as root app.js with:
- * - batchGet: grid A1:L{DATA_END_ROW} + version cell AA1
+ * - batchGet: grid A1:L{DATA_END_ROW} + version cell Z1
  * - Sheet layout v1 (legacy A–K) vs v2 (URL column D, data through L)
  * - Optional activity links when URL is https
  */
@@ -235,7 +235,7 @@
   }
 
   /**
-   * Parse semver from AA1 (e.g. v2.0.0). Returns null if missing/invalid.
+   * Parse semver from Z1 (e.g. v2.0.0). Returns null if missing/invalid.
    */
   function parseSheetVersion(cell) {
     if (cell === null || cell === undefined) return null;
@@ -281,20 +281,20 @@
   }
 
   /**
-   * batchGet: grid A1:L{DATA_END_ROW} + AA1
+   * batchGet: grid A1:L{DATA_END_ROW} + Z1 (column Z exists in all sheets; AA may error on narrow grids)
    * @returns {Promise<{ gridRows: Array, versionRaw: * }|null>}
    */
   async function fetchSheetData(spreadsheetId, tabName) {
     var gridRangeStr = tabName + '!A1:L' + DATA_END_ROW;
-    var aaRangeStr = tabName + '!AA1';
+    var versionRangeStr = tabName + '!Z1';
     var url = SHEETS_API + '/' + spreadsheetId
       + '/values:batchGet'
       + '?ranges=' + encodeURIComponent(gridRangeStr)
-      + '&ranges=' + encodeURIComponent(aaRangeStr)
+      + '&ranges=' + encodeURIComponent(versionRangeStr)
       + '&valueRenderOption=FORMATTED_VALUE'
       + '&key=' + API_KEY;
 
-    console.log('[Presupuesto dev] batchGet: ' + gridRangeStr + ' + ' + aaRangeStr);
+    console.log('[Presupuesto dev] batchGet: ' + gridRangeStr + ' + ' + versionRangeStr);
 
     var response;
     try {
@@ -333,7 +333,7 @@
       }
     }
 
-    console.log('[Presupuesto dev] Received grid rows: ' + gridRows.length + ', AA1: ' + String(versionRaw));
+    console.log('[Presupuesto dev] Received grid rows: ' + gridRows.length + ', Z1: ' + String(versionRaw));
     return { gridRows: gridRows, versionRaw: versionRaw };
   }
 
@@ -402,7 +402,7 @@
         };
       }
 
-      // flat values + optional sheetVersion (simulates AA1)
+      // flat values + optional sheetVersion (simulates Z1)
       if (data.values && Array.isArray(data.values) && data.values.length > 0) {
         var versionRaw = data.sheetVersion !== undefined && data.sheetVersion !== null
           ? data.sheetVersion
@@ -639,7 +639,7 @@
     if (!fetched) return;
 
     var layout = resolveLayout(fetched.gridRows, fetched.versionRaw);
-    console.log('[Presupuesto dev] Layout: ' + layout + ', AA1: ' + String(fetched.versionRaw));
+    console.log('[Presupuesto dev] Layout: ' + layout + ', Z1: ' + String(fetched.versionRaw));
 
     var data = parseEstimateData(fetched.gridRows, tabName, layout);
     console.log('[Presupuesto dev] Parsed:', data);

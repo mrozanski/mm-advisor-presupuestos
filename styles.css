@@ -28,7 +28,6 @@
 .day-bubble,
 .day-date,
 .pax-calc,
-.pax-total,
 .total-final-amount {
   font-family: var(--font-numeric);
 }
@@ -275,7 +274,7 @@ header {
 .activity + .activity {
   margin-top: 14px;
   padding-top: 14px;
-  border-top: 1px dashed var(--border);
+  border-top: 1px solid var(--border);
 }
 
 .activity-name {
@@ -327,17 +326,16 @@ header {
 }
 
 .pax-label { color: var(--muted); flex-shrink: 0; }
-.pax-calc { flex: 1; overflow-wrap: break-word; }
-.pax-total { font-weight: 600; color: var(--navy-dark); white-space: nowrap; }
+.pax-calc { flex: 1; overflow-wrap: break-word; text-align: right; }
 
-/* Activity subtotal — SUPPRESSED for MVP (uncomment later) */
+/* Activity subtotal (sheet totalExcursion; matches sum of line totals when sheet is consistent) */
 .activity-subtotal {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 6px;
   padding-top: 8px;
-  border-top: 1px solid var(--border);
+  border-top: 1px dashed var(--border);
   font-size: 13px;
 }
 
@@ -354,7 +352,7 @@ header {
   font-size: 14px;
 }
 
-/* Day total — SUPPRESSED for MVP (uncomment later) */
+/* Day total — sum of activity totalExcursion for that day */
 .day-total-row {
   display: flex;
   justify-content: space-between;

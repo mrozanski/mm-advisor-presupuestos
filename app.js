@@ -543,8 +543,10 @@
     var defaultDay = document.getElementById('default-day');
     var tplDay = document.getElementById('tpl-day');
     var tplActivity = document.getElementById('tpl-activity');
+    var tplDayTotal = document.getElementById('tpl-day-total');
     var tplPaxRow = document.getElementById('tpl-pax-row');
 
+    /* tpl-day-total is optional (omit from HTML to hide day footer). */
     if (!timeline || !tplDay || !tplActivity || !tplPaxRow) {
       console.error('[Presupuesto] Missing template elements');
       return;
@@ -602,19 +604,30 @@
           var rowEl = tplPaxRow.content.cloneNode(true);
           var paxLabel = rowEl.querySelector('[data-field="paxLabel"]');
           var paxCalc = rowEl.querySelector('[data-field="paxCalc"]');
-          var paxTotal = rowEl.querySelector('[data-field="paxTotal"]');
-
-          var lineTotal = pax.qty * pax.price;
 
           if (paxLabel) paxLabel.textContent = pax.label;
           if (paxCalc) paxCalc.textContent = pax.qty + ' × ' + fmtAmount(pax.price, curr);
-          if (paxTotal) paxTotal.textContent = '= ' + fmtAmount(lineTotal, curr);
 
           if (paxList) paxList.appendChild(rowEl);
         });
 
+        var subtotalEl = actEl.querySelector('[data-field="activitySubtotal"]');
+        if (subtotalEl) subtotalEl.textContent = fmtAmount(activity.totalExcursion, curr);
+
         if (dayCard) dayCard.appendChild(actEl);
       });
+
+      if (dayCard && tplDayTotal) {
+        var daySum = group.activities.reduce(function (s, a) {
+          return s + a.totalExcursion;
+        }, 0);
+        var dayTotalFrag = tplDayTotal.content.cloneNode(true);
+        var dayTotalLabel = dayTotalFrag.querySelector('[data-field="dayTotalLabel"]');
+        var dayTotalAmount = dayTotalFrag.querySelector('[data-field="dayTotalAmount"]');
+        if (dayTotalLabel) dayTotalLabel.textContent = 'Total día ' + group.day;
+        if (dayTotalAmount) dayTotalAmount.textContent = fmtAmount(daySum, curr);
+        dayCard.appendChild(dayTotalFrag);
+      }
 
       timeline.appendChild(dayEl);
     });

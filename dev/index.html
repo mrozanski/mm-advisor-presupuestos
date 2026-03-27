@@ -140,7 +140,6 @@
                 <li class="pax-row">
                   <span class="pax-label">Adultos</span>
                   <span class="pax-calc">0 × $ 0</span>
-                  <span class="pax-total">= $ 0</span>
                 </li>
               </ul>
             </div>
@@ -232,6 +231,17 @@
       <ul class="pax-list">
         <!-- pax rows are appended here by JS -->
       </ul>
+      <div class="activity-subtotal">
+        <span class="subtotal-label">Subtotal</span>
+        <span class="subtotal-amount" data-field="activitySubtotal"></span>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-day-total">
+    <div class="day-total-row">
+      <span class="day-total-label" data-field="dayTotalLabel"></span>
+      <span class="day-total-amount" data-field="dayTotalAmount"></span>
     </div>
   </template>
 
@@ -239,7 +249,6 @@
     <li class="pax-row">
       <span class="pax-label" data-field="paxLabel"></span>
       <span class="pax-calc" data-field="paxCalc"></span>
-      <span class="pax-total" data-field="paxTotal"></span>
     </li>
   </template>
 

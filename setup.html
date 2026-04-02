@@ -107,7 +107,7 @@
 
     <p style="text-align: center;">
       <a class="bookmarklet-link"
-         href="javascript:void(function(){var m=location.pathname.match(/\/d\/([^\/]+)/),g=location.hash.match(/gid=(\d+)/);if(!m||!g){alert('Abrí una pestaña de Google Sheets primero');return}var u='https://mrozanski.github.io/mm-advisor-presupuestos/?id='+m[1]+'&amp;gid='+g[1];var t=document.createElement('textarea');t.value=u;t.setAttribute('readonly','');t.style.position='fixed';t.style.left='-9999px';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(t);if(navigator.clipboard&amp;&amp;navigator.clipboard.writeText)navigator.clipboard.writeText(u);window.open(u)})()">
+         href="javascript:void(function(){var h=window.location.href,m=h.match(/\/d\/([^\/]+)/),g=h.match(/[#&amp;]gid=(\d+)/);if(!m||!g){alert('Abrí una pestaña de Google Sheets primero');return}var u='https://mrozanski.github.io/mm-advisor-presupuestos/?id='+m[1]+'&amp;gid='+g[1];var t=document.createElement('textarea');t.value=u;t.setAttribute('readonly','');t.style.position='fixed';t.style.left='-9999px';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(t);if(navigator.clipboard&amp;&amp;navigator.clipboard.writeText)navigator.clipboard.writeText(u);window.open(u)})()">
         📋 Ver/Copiar Presupuesto
       </a>
     </p>

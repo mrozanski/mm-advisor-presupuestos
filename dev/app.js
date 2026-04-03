@@ -6,7 +6,7 @@
  * 1. Optional local fixture (test-data/*.json) on localhost or ?local=1
  * 2. URL params id, gid → resolve tab name → batchGet grid A1:L{DATA_END_ROW} + Z1
  * 3. Layout v1 (legacy A–K) vs v2 (URL column D) vs v3 (meta block + semver K1/Z1)
- * 4. Parse, populate DOM; v2/v3 activities may show title + external-link icon
+ * 4. Parse, populate DOM; v2/v3 activities may show title + external-link icon; v3 pagos extras from C26:C40
  *
  * On failure, default layout remains with error banner.
  *
@@ -18,7 +18,12 @@
 
   var API_KEY = 'AIzaSyAPM00wGH79nT0bIvAXSb3TDMMcnULjydU';
   var SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
-  var DATA_END_ROW = 24;
+  var DATA_END_ROW = 40;
+  /** 0-based row index of sheet row 26 (start of v3 pagos-extras range C26:C40). */
+  var PAGOS_EXTRAS_ROW_START = 25;
+  /** 0-based row index of sheet row 40 (inclusive end of C26:C40). */
+  var PAGOS_EXTRAS_ROW_END = 39;
+  var PAGOS_EXTRAS_COL = 2;
   /** Relative to dev/index.html (repo root has test-data/). */
   var LOCAL_FIXTURE_PATH = '../test-data/response.json';
   /** Optional v2 sample (URL column + sheetVersion simulating Z1). */
@@ -325,6 +330,28 @@
     }
   }
 
+  /** v3 sheet C column: strip leading "* " or "*", else trim only. */
+  function normalizePagosExtraLine(raw) {
+    if (raw === null || raw === undefined) return '';
+    var s = String(raw).trim();
+    if (!s) return '';
+    if (s.charAt(0) === '*') {
+      if (s.charAt(1) === ' ') s = s.slice(2).trim();
+      else s = s.slice(1).trim();
+    }
+    return s;
+  }
+
+  function parsePagosExtrasFromGrid(rows) {
+    var out = [];
+    for (var r = PAGOS_EXTRAS_ROW_START; r <= PAGOS_EXTRAS_ROW_END && r < rows.length; r++) {
+      var cell = rows[r] && rows[r][PAGOS_EXTRAS_COL];
+      var line = normalizePagosExtraLine(cell);
+      if (line) out.push(line);
+    }
+    return out;
+  }
+
   /**
    * batchGet: grid A1:L{DATA_END_ROW} + Z1 (column Z exists in all sheets; AA may error on narrow grids)
    * @returns {Promise<{ gridRows: Array, versionRaw: * }|null>}
@@ -503,7 +530,9 @@
     var minorsMeta = parseNum(rows[3] && rows[3][2]);
     var infantsMeta = parseNum(rows[4] && rows[4][2]);
 
-    var body = headerIdx >= 0 ? rows.slice(headerIdx + 1) : [];
+    var body = headerIdx >= 0
+      ? rows.slice(headerIdx + 1, Math.min(rows.length, PAGOS_EXTRAS_ROW_START))
+      : [];
     var activities = [];
     for (var i = 0; i < body.length; i++) {
       var act = parseActivityRowV2(body[i]);
@@ -511,6 +540,7 @@
     }
 
     var currency = detectCurrency(body, 'v3');
+    var pagosExtras = parsePagosExtrasFromGrid(rows);
 
     var grandTotal = activities.reduce(function (sum, a) {
       return sum + a.totalExcursion;
@@ -539,6 +569,7 @@
       tripDays: dayGroups.length,
       tripDateRange: buildTripDateRange(activities),
       layout: 'v3',
+      pagosExtras: pagosExtras,
       passengers: {
         adults: adultsMeta,
         minors: minorsMeta,
@@ -645,6 +676,35 @@
     ));
 
     setField('grandTotalBottom', fmtAmount(data.grandTotal, curr));
+
+    var pagosSection = document.getElementById('pagos-extras');
+    if (pagosSection) {
+      if (data.layout !== 'v3') {
+        // v1/v2: leave hardcoded HTML content as-is.
+        pagosSection.hidden = false;
+      } else {
+        // v3: display pagos extras from range.
+        var extras = data.pagosExtras || [];
+        if (extras.length === 0) {
+          pagosSection.hidden = true;
+        } else {
+          pagosSection.hidden = false;
+          var extrasUl = pagosSection.querySelector('.extras-list');
+          if (extrasUl) {
+            extrasUl.textContent = '';
+            for (var ex = 0; ex < extras.length; ex++) {
+              var li = document.createElement('li');
+              li.className = 'extras-item';
+              var sp = document.createElement('span');
+              sp.className = 'extras-desc';
+              sp.textContent = extras[ex];
+              li.appendChild(sp);
+              extrasUl.appendChild(li);
+            }
+          }
+        }
+      }
+    }
 
     var waLink = document.getElementById('whatsapp-link');
     if (waLink) {

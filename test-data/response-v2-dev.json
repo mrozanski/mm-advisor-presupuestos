@@ -1,24 +1,98 @@
 {
-  "range": "'Test v2'!A1:L18",
-  "sheetVersion": "2.0.0",
-  "values": [
-    ["DÍA", "FECHA ", "EXCURSIÓN ", "URL Actividad", "adto", "valor ind", "menor", "valor ind", "infante", "valor ind", "TOTAL x EXCURSIÓN ", "TOTAL PRESUPUESTO "],
-    [1, "2026-05-18T03:00:00.000Z", "Beer Experience -clasico", "", 2, 35, "", "", "", "", 70, 1156],
-    [2, "2026-05-19T03:00:00.000Z", "Centro Nordico - combo raqueta + moto", "", 2, 77, "", "", "", "", 154, ""],
-    [3, "2026-05-20T03:00:00.000Z", "San Martin de los Andes x camino de 7 lagos", "https://marinamosmannadvisor.com/producto/san-martin-de-los-andes-por-7-lagos/", 2, 166, "", "", "", "", 332, "Fecha preparación"],
-    [3, "2006-05-20T03:00:00.000Z", "Cabalgata en la Estepa con asado", "", 2, 195, "", "", "", "", 390, "2026-03-24T03:00:00.000Z"],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", 0, ""],
-    ["", "", "", "", "", "", "", "", "", "", "", ""]
+  "spreadsheetId": "1iJfbSpFpIkAoDAlXhxLYUiQSUr39hw_SmO8k918ZhfU",
+  "valueRanges": [
+    {
+      "range": "'Emily Subtotal'!A1:L18",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "DÍA",
+          "FECHA ",
+          "EXCURSIÓN ",
+          "URL",
+          "adto",
+          "valor ind",
+          "menor",
+          "valor ind",
+          "infante",
+          "valor ind",
+          "TOTAL x EXCURSIÓN ",
+          "TOTAL PRESUPUESTO "
+        ],
+        [
+          "1",
+          "02/06/2026",
+          "Nieve al Limite",
+          "https://marinamosmannadvisor.com/producto/nieve-al-limite/",
+          "2",
+          "ARS15.000",
+          "2",
+          "ARS12.000",
+          "",
+          "",
+          "ARS54.000",
+          "ARS318.000"
+        ],
+        [
+          "2",
+          "03/06/2026",
+          "Puerto Blest, Cascada de los Cántaros & Lago Frías",
+          "https://marinamosmannadvisor.com/producto/puerto-blest-cascada-de-los-cantaros-lago-frias/",
+          "2",
+          "ARS15.000",
+          "2",
+          "ARS12.000",
+          "",
+          "",
+          "ARS54.000"
+        ],
+        [
+          "2",
+          "03/06/2026",
+          "Centro Nordico - dia ski nordico",
+          "https://marinamosmannadvisor.com/producto/dia-de-ski-nordico/",
+          "2",
+          "ARS25.000",
+          "2",
+          "ARS20.000",
+          "",
+          "",
+          "ARS90.000",
+          "Fecha preparación"
+        ],
+        [
+          "",
+          "04/06/2026",
+          "Puerto Blest, Cascada de los Cántaros & Lago Frías",
+          "https://marinamosmannadvisor.com/producto/puerto-blest-cascada-de-los-cantaros-lago-frias/",
+          "2",
+          "ARS30.000",
+          "2",
+          "ARS30.000",
+          "",
+          "",
+          "ARS120.000",
+          "24/03/2026"
+        ],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"],
+        ["", "", "", "", "", "", "", "", "", "", "ARS0"]
+      ]
+    },
+    {
+      "range": "'Emily Subtotal'!Z1",
+      "majorDimension": "ROWS",
+      "values": [["v2.0.0"]]
+    }
   ]
 }

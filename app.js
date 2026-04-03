@@ -5,8 +5,8 @@
  * Flow:
  * 1. Optional local fixture (test-data/*.json) on localhost or ?local=1
  * 2. URL params id, gid → resolve tab name → batchGet grid A1:L{DATA_END_ROW} + Z1
- * 3. Layout v1 (legacy A–K) vs v2 (URL column D, semver in Z1 or header heuristic)
- * 4. Parse, populate DOM; v2 activities may show title + external-link icon
+ * 3. Layout v1 (legacy A–K) vs v2 (URL column D) vs v3 (meta block + semver K1/Z1)
+ * 4. Parse, populate DOM; v2/v3 activities may show title + external-link icon
  *
  * On failure, default layout remains with error banner.
  */
@@ -16,11 +16,13 @@
 
   var API_KEY = 'AIzaSyAPM00wGH79nT0bIvAXSb3TDMMcnULjydU';
   var SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
-  var DATA_END_ROW = 18;
+  var DATA_END_ROW = 24;
   /** Relative to index.html at site root. */
   var LOCAL_FIXTURE_PATH = 'test-data/response.json';
   /** Optional v2 sample (URL column + sheetVersion simulating Z1). */
   var LOCAL_FIXTURE_V2_PATH = 'test-data/response-v2-dev.json';
+  /** v3 meta block + semver in K1 (and optional Z1). */
+  var LOCAL_FIXTURE_V3_PATH = 'test-data/response-v3-dev.json';
 
   var CURRENCY_MAP = {
     'R$':  { symbol: 'R$',  label: 'R$ (Reais)',           locale: 'pt-BR' },
@@ -72,10 +74,10 @@
   }
 
   /**
-   * @param {'v1'|'v2'} layout
+   * @param {'v1'|'v2'|'v3'} layout
    */
   function detectCurrency(rows, layout) {
-    var priceCols = layout === 'v2' ? [5, 7, 9, 10] : [4, 6, 8, 9];
+    var priceCols = (layout === 'v2' || layout === 'v3') ? [5, 7, 9, 10] : [4, 6, 8, 9];
     var hasUsd = false;
     var hasArs = false;
     var hasRs = false;
@@ -263,12 +265,49 @@
     return t.indexOf('url') !== -1;
   }
 
+  /** Semver from K1 (col 10), then Z1 from batch. */
+  function getSheetSemver(rows, versionRawZ1) {
+    var k1 = rows && rows[0] && rows[0][10] !== undefined && rows[0][10] !== ''
+      ? String(rows[0][10]).trim() : '';
+    if (k1) {
+      var vk = parseSheetVersion(k1);
+      if (vk) return { parsed: vk, raw: k1 };
+    }
+    if (versionRawZ1 !== null && versionRawZ1 !== undefined && String(versionRawZ1).trim() !== '') {
+      var vz = parseSheetVersion(versionRawZ1);
+      if (vz) return { parsed: vz, raw: String(versionRawZ1).trim() };
+    }
+    return { parsed: null, raw: '' };
+  }
+
+  /** Row index of DIA + URL header (v3 activity table). Returns -1 if not found. */
+  function findV3ActivityHeaderIndex(rows) {
+    if (!rows) return -1;
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (!r) continue;
+      var c0 = String(r[0] || '').trim().toLowerCase().replace(/í/g, 'i').replace(/á/g, 'a');
+      if (c0 !== 'dia') continue;
+      var d = String(r[3] || '').trim().toLowerCase();
+      if (d.indexOf('url') !== -1) return i;
+    }
+    return -1;
+  }
+
+  function looksLikeV3MetaBlock(rows) {
+    if (!rows || !rows[0]) return false;
+    var b = String(rows[0][1] || '').trim().toLowerCase();
+    return b.indexOf('cliente') !== -1;
+  }
+
   /**
-   * @returns {'v1'|'v2'}
+   * @returns {'v1'|'v2'|'v3'}
    */
-  function resolveLayout(rows, versionRaw) {
-    var v = parseSheetVersion(versionRaw);
-    if (v && v.major >= 2) return 'v2';
+  function resolveLayout(rows, versionRawZ1) {
+    var sv = getSheetSemver(rows, versionRawZ1);
+    if (sv.parsed && sv.parsed.major >= 3) return 'v3';
+    if (sv.parsed && sv.parsed.major >= 2) return 'v2';
+    if (rows && looksLikeV3MetaBlock(rows) && findV3ActivityHeaderIndex(rows) > 0) return 'v3';
     if (rows && headerLooksLikeV2(rows)) return 'v2';
     return 'v1';
   }
@@ -364,6 +403,7 @@
   function localFixturePaths() {
     var v = new URLSearchParams(location.search).get('fixture');
     if (v === 'v2') return [LOCAL_FIXTURE_V2_PATH, LOCAL_FIXTURE_PATH];
+    if (v === 'v3') return [LOCAL_FIXTURE_V3_PATH, LOCAL_FIXTURE_V2_PATH, LOCAL_FIXTURE_PATH];
     return [LOCAL_FIXTURE_PATH, LOCAL_FIXTURE_V2_PATH];
   }
 
@@ -423,7 +463,93 @@
     return null;
   }
 
+  /** One v2-shaped activity row (URL column D, subtotal column K). Returns null if not an activity row. */
+  function parseActivityRowV2(row) {
+    var excursion = (row[2] || '').toString().trim();
+    if (!excursion) return null;
+    var rawUrl = row[3];
+    var urlStr = rawUrl !== null && rawUrl !== undefined ? String(rawUrl).trim() : '';
+    return {
+      day: row[0] || '',
+      date: row[1] || '',
+      excursion: excursion,
+      url: isSafeHttpUrl(urlStr) ? urlStr : '',
+      adultsQty: parseNum(row[4]),
+      adultsPrice: parseNum(row[5]),
+      minorsQty: parseNum(row[6]),
+      minorsPrice: parseNum(row[7]),
+      infantsQty: parseNum(row[8]),
+      infantsPrice: parseNum(row[9]),
+      totalExcursion: parseNum(row[10])
+    };
+  }
+
+  function parseEstimateDataV3(rows, tabName) {
+    var headerIdx = findV3ActivityHeaderIndex(rows);
+    if (headerIdx < 0) {
+      console.warn('[Presupuesto] v3: no activity header row (DIA + URL) found.');
+    }
+
+    var issueRaw = rows[1] && rows[1][2];
+    var issueDateDisplay = formatDate(issueRaw);
+
+    var clientCell = rows[0] && rows[0][2] !== undefined && rows[0][2] !== null
+      ? String(rows[0][2]).trim() : '';
+    var displayName = clientCell || tabName;
+
+    var adultsMeta = parseNum(rows[2] && rows[2][2]);
+    var minorsMeta = parseNum(rows[3] && rows[3][2]);
+    var infantsMeta = parseNum(rows[4] && rows[4][2]);
+
+    var body = headerIdx >= 0 ? rows.slice(headerIdx + 1) : [];
+    var activities = [];
+    for (var i = 0; i < body.length; i++) {
+      var act = parseActivityRowV2(body[i]);
+      if (act) activities.push(act);
+    }
+
+    var currency = detectCurrency(body, 'v3');
+
+    var grandTotal = activities.reduce(function (sum, a) {
+      return sum + a.totalExcursion;
+    }, 0);
+
+    var dayMap = {};
+    activities.forEach(function (a) {
+      var key = String(a.day);
+      if (!dayMap[key]) {
+        dayMap[key] = { day: a.day, date: a.date, activities: [] };
+      }
+      dayMap[key].activities.push(a);
+    });
+
+    var dayGroups = Object.keys(dayMap)
+      .sort(function (a, b) { return parseInt(a) - parseInt(b); })
+      .map(function (key) { return dayMap[key]; });
+
+    return {
+      clientName: displayName,
+      currency: currency,
+      issueDateDisplay: issueDateDisplay,
+      activities: activities,
+      dayGroups: dayGroups,
+      grandTotal: grandTotal,
+      tripDays: dayGroups.length,
+      tripDateRange: buildTripDateRange(activities),
+      layout: 'v3',
+      passengers: {
+        adults: adultsMeta,
+        minors: minorsMeta,
+        infants: infantsMeta
+      }
+    };
+  }
+
   function parseEstimateData(rows, tabName, layout) {
+    if (layout === 'v3') {
+      return parseEstimateDataV3(rows, tabName);
+    }
+
     var issueCol = layout === 'v2' ? 11 : 10;
     var issueRaw = rows[4] && rows[4][issueCol];
     var issueDateDisplay = formatDate(issueRaw);
@@ -438,21 +564,8 @@
       if (!excursion) continue;
 
       if (layout === 'v2') {
-        var rawUrl = row[3];
-        var urlStr = rawUrl !== null && rawUrl !== undefined ? String(rawUrl).trim() : '';
-        activities.push({
-          day: row[0] || '',
-          date: row[1] || '',
-          excursion: excursion,
-          url: isSafeHttpUrl(urlStr) ? urlStr : '',
-          adultsQty: parseNum(row[4]),
-          adultsPrice: parseNum(row[5]),
-          minorsQty: parseNum(row[6]),
-          minorsPrice: parseNum(row[7]),
-          infantsQty: parseNum(row[8]),
-          infantsPrice: parseNum(row[9]),
-          totalExcursion: parseNum(row[10])
-        });
+        var act = parseActivityRowV2(row);
+        if (act) activities.push(act);
       } else {
         activities.push({
           day: row[0] || '',
@@ -639,7 +752,8 @@
     var local = await tryLoadLocalFixture();
     if (local) {
       var layout = resolveLayout(local.gridRows, local.versionRaw);
-      console.log('[Presupuesto] Local mode — layout: ' + layout + ', version cell: ' + String(local.versionRaw));
+      var k1r = local.gridRows && local.gridRows[0] && local.gridRows[0][10];
+      console.log('[Presupuesto] Local mode — layout: ' + layout + ', K1: ' + String(k1r) + ', Z1: ' + String(local.versionRaw));
       var dataLocal = parseEstimateData(local.gridRows, local.tabName, layout);
       console.log('[Presupuesto] Parsed:', dataLocal);
       populateDOM(dataLocal);
@@ -656,7 +770,8 @@
     if (!fetched) return;
 
     var layout = resolveLayout(fetched.gridRows, fetched.versionRaw);
-    console.log('[Presupuesto] Layout: ' + layout + ', Z1: ' + String(fetched.versionRaw));
+    var k1live = fetched.gridRows && fetched.gridRows[0] && fetched.gridRows[0][10];
+    console.log('[Presupuesto] Layout: ' + layout + ', K1: ' + String(k1live) + ', Z1: ' + String(fetched.versionRaw));
 
     var data = parseEstimateData(fetched.gridRows, tabName, layout);
     console.log('[Presupuesto] Parsed:', data);

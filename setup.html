@@ -50,6 +50,14 @@
       font-weight: 700;
       font-size: 13px;
     }
+    .step-number.optional {
+      width: auto;
+      min-width: 26px;
+      padding: 0 8px;
+      border-radius: 13px;
+      background: #6B7A99;
+      font-size: 11px;
+    }
     .step p {
       font-size: 14px;
     }
@@ -101,13 +109,18 @@
     </div>
 
     <div class="step">
+      <span class="step-number optional">-</span>
+      <p><em>(Opcional)</em> Si ya tenías instalada una versión anterior del botón, quitá el marcador viejo de Chrome: hacé <strong>clic derecho</strong> sobre el ícono en la <strong>barra de marcadores</strong> y elegí <strong>Eliminar</strong>. También podés abrir el <strong>Administrador de marcadores</strong> (<strong>Ctrl+Shift+O</strong> en Windows/Linux, <strong>⌘+Opción+B</strong> en Mac) o desde el menú <strong>Marcadores y listas → Administrador de marcadores</strong>, buscar el marcador y borrarlo desde la lista.</p>
+    </div>
+
+    <div class="step">
       <span class="step-number">2</span>
       <p><strong>Arrastrá</strong> este botón hacia tu barra de marcadores:</p>
     </div>
 
     <p style="text-align: center;">
       <a class="bookmarklet-link"
-         href="javascript:void(function(){var h=window.location.href,m=h.match(/\/d\/([^\/]+)/),g=h.match(/[#&amp;]gid=(\d+)/);if(!m||!g){alert('Abrí una pestaña de Google Sheets primero');return}var u='https://mrozanski.github.io/mm-advisor-presupuestos/?id='+m[1]+'&amp;gid='+g[1];var t=document.createElement('textarea');t.value=u;t.setAttribute('readonly','');t.style.position='fixed';t.style.left='-9999px';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(t);if(navigator.clipboard&amp;&amp;navigator.clipboard.writeText)navigator.clipboard.writeText(u);window.open(u)})()">
+         href="javascript:void(function(){var h=window.location.href,m=h.match(/\/d\/([^\/]+)/),g=h.match(/[#&amp;]gid=(\d+)/);if(!m||!g){alert('Abrí una pestaña de Google Sheets primero');return}var u='https://viaje.marinamosmannadvisor.com/?id='+m[1]+'&amp;gid='+g[1];var t=document.createElement('textarea');t.value=u;t.setAttribute('readonly','');t.style.position='fixed';t.style.left='-9999px';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(t);if(navigator.clipboard&amp;&amp;navigator.clipboard.writeText)navigator.clipboard.writeText(u);window.open(u)})()">
         📋 Ver/Copiar Presupuesto
       </a>
     </p>
@@ -118,7 +131,7 @@
 
     <div class="step">
       <span class="step-number">3</span>
-      <p>Listo. Ahora cuando estés en una planilla de presupuesto en Google Sheets, hacé clic en <strong>📋 Presupuesto</strong> en tu barra de marcadores: se abre la vista para el cliente y el enlace (que empieza con <code>https://mrozanski.github.io</code>) queda copiado al portapapeles para que lo pegues donde quieras.</p>
+      <p>Listo. Ahora cuando estés en una planilla de presupuesto en Google Sheets, hacé clic en <strong>📋 Presupuesto</strong> en tu barra de marcadores: se abre la vista para el cliente y el enlace (que empieza con <code>https://viaje.marinamosmannadvisor.com</code>) queda copiado al portapapeles para que lo pegues donde quieras.</p>
     </div>
 
     <p class="note">

@@ -1,0 +1,114 @@
+{
+  "range": "'Guiilermo Lara 2+3'!A1:J10",
+  "majorDimension": "ROWS",
+  "values": [
+    [
+      "DÍA",
+      "FECHA ",
+      "EXCURSIÓN ",
+      "adto",
+      "valor ind",
+      "menor",
+      "valor ind",
+      "infante",
+      "valor ind",
+      "TOTAL x EXCURSIÓN "
+    ],
+    [
+      "1",
+      "15/07/2026",
+      "Traslado de Llegada al Aeropuerto hacia el alojamiento",
+      "2",
+      "USD40",
+      "3",
+      "USD40",
+      "",
+      "",
+      "USD200"
+    ],
+    [
+      "",
+      "",
+      "Noche Nórdica",
+      "2",
+      "USD300",
+      "3",
+      "USD260",
+      "",
+      "",
+      "USD1,380"
+    ],
+    [
+      "2",
+      "16/07/2026",
+      "Cerro Catedral Paseo en H1",
+      "2",
+      "USD42",
+      "3",
+      "USD42",
+      "",
+      "",
+      "USD210"
+    ],
+    [
+      "3",
+      "17/07/2026",
+      "Piedras Blancas con Traslado",
+      "2",
+      "USD147",
+      "3",
+      "USD147",
+      "",
+      "",
+      "USD735"
+    ],
+    [
+      "4",
+      "18/07/2026",
+      "Centro de Ski Nórdico con Combo ski con moto",
+      "2",
+      "USD198",
+      "3",
+      "USD198",
+      "",
+      "",
+      "USD990"
+    ],
+    [
+      "5",
+      "19/07/2026",
+      "Villa La Angostura con Cerro Bayo ",
+      "2",
+      "USD66",
+      "3",
+      "USD66",
+      "",
+      "",
+      "USD330"
+    ],
+    [
+      "6",
+      "20/07/2026",
+      "Traslado de Salida del Alojamiento hacia el aeropuerto",
+      "2",
+      "USD40",
+      "3",
+      "USD40",
+      "",
+      "",
+      "USD200"
+    ],
+    [
+      "",
+      "",
+      "Ropa de Nieve por 4 dias ",
+      "2",
+      "USD74",
+      "3",
+      "USD74",
+      "",
+      "",
+      "USD370"
+    ]
+  ]
+}

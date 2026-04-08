@@ -1,0 +1,24 @@
+{
+  "range": "'VALVERDE MARCELA '!A1:K18",
+  "majorDimension": "ROWS",
+  "values": [
+    ["DÍA", "FECHA ", "EXCURSIÓN ", "adto", "valor ind", "menor", "valor ind", "infante", "valor ind", "TOTAL x EXCURSIÓN "],
+    ["1", "18/05/26", "Traslado Aerpouerto/Hotel", "2", "USD35", "", "", "", "", "USD70", "USD1.156"],
+    ["2", "19/05/2026", "San Martin de los Andes x Camino de 7 Lagos ", "2", "USD77", "", "", "", "", "USD154"],
+    ["3", "20/05/2026", "Puerto Blest, Cascada de los Cantaros y Lago Frias", "2", "USD166", "", "", "", "", "USD332"],
+    ["3", "20/05/2006", "Laguna Congelada ", "2", "USD195", "", "", "", "", "USD390", "24/03/2026"],
+    ["4", "21/05/2026", "Circuito Chico + Cerro Catedral (ascesos no inlcuidos)", "2", "USD70", "", "", "", "", "USD140"],
+    ["4", "21/05/2026", "Traslado Hotel/Aeropuerto", "2", "USD35", "", "", "", "", "USD70"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"],
+    ["", "", "", "", "", "", "", "", "", "USD0"]
+  ]
+}

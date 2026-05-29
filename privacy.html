@@ -44,6 +44,14 @@
       margin-bottom: 3rem;
     }
 
+    .lang-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+
     .lang-tag {
       display: inline-block;
       background: #1E4FA0;
@@ -55,6 +63,21 @@
       padding: 0.2rem 0.6rem;
       border-radius: 3px;
       margin-bottom: 1.2rem;
+    }
+
+    .lang-link {
+      font-size: 0.85rem;
+      color: #1E4FA0;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .lang-header .lang-tag {
+      margin-bottom: 0;
+    }
+
+    .lang-link:hover {
+      text-decoration: underline;
     }
 
     h2 {
@@ -112,8 +135,11 @@
 <div class="container">
 
   <!-- ── ESPAÑOL ── -->
-  <section>
-    <span class="lang-tag">Español</span>
+  <section id="espanol">
+    <div class="lang-header">
+      <span class="lang-tag">Español</span>
+      <a class="lang-link" href="#portugues">Ver em português</a>
+    </div>
 
     <h2>Política de Privacidad</h2>
     <p><strong>Última actualización:</strong> mayo de 2026</p>
@@ -174,8 +200,11 @@
   <hr class="divider" />
 
   <!-- ── PORTUGUÊS ── -->
-  <section>
-    <span class="lang-tag">Português</span>
+  <section id="portugues">
+    <div class="lang-header">
+      <span class="lang-tag">Português</span>
+      <a class="lang-link" href="#espanol">Ver en español</a>
+    </div>
 
     <h2>Política de Privacidade</h2>
     <p><strong>Última atualização:</strong> maio de 2026</p>

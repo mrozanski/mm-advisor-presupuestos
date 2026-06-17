@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Como testar Calendly / WhatsApp — MMA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1A1A2E;
+      background: #fff;
+      line-height: 1.65;
+      font-size: 1rem;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0D2952 0%, #1A3A6B 60%, #1E4FA0 100%);
+      color: #fff;
+      padding: 1.75rem 1.25rem;
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    main {
+      max-width: 36rem;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 8rem;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0D2952;
+      margin: 2rem 0 0.75rem;
+    }
+    h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0D2952;
+      margin: 1rem 0 0.75rem;
+    }
+    h2:first-of-type {
+      margin-top: 0;
+    }
+
+    p, ol, ul {
+      margin-bottom: 1rem;
+    }
+
+    ol {
+      padding-left: 1.35rem;
+    }
+
+    ul {
+      padding-left: 1.25rem;
+      margin-top: 0.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    li:last-child {
+      margin-bottom: 0;
+    }
+
+    a {
+      color: #1E4FA0;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    strong {
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Como testar a automação Calendly / WhatsApp</h1>
+  </header>
+
+  <main>
+    <h2>Antes de começar</h2>
+    <ul>
+      <li>Use um <strong>número de WhatsApp real</strong> e um <strong>e-mail real</strong>: você vai precisar deles para receber as mensagens e cancelar a reunião mais adiante.</li>
+      <li>Os demais dados do formulário podem ser quaisquer.</li>
+    </ul>
+
+    <h2>Teste 1: cancelar uma reunião</h2>
+    <h3>Calendly</h3>
+    <p>→ Agende uma reunião no Calendly: <a href="https://calendly.com/mm-advisor/asesoria-de-excursiones-en-bariloche-clon">calendly.com/mm-advisor/asesoria-de-excursiones-en-bariloche-clon</a></p>
+    <h3>WhatsApp</h3>
+    <p>→ Aguarde receber <strong>duas mensagens seguidas</strong> no WhatsApp e confirme que:</p>
+        <ul>
+          <li>Chegam as <strong>duas</strong> mensagens.</li>
+          <li>As duas estão <strong>em português</strong>.</li>
+          <li>Uma mensagem inclui um <strong>link para falar com a MMA</strong> → toque nele e verifique se abre o chat com a Marina.</li>
+          <li>A outra mensagem mostra a <strong>data e o horário</strong> da reunião, no <strong>fuso horário</strong> que você escolheu no Calendly.</li>
+          <li>Essa mesma mensagem tem <strong>dois botões</strong>: confirmar e cancelar.</li>
+        </ul>
+    <p>→ Cancele a reunião. Ao tocar em <strong>"Cancelar"</strong>, nos conte o que aparece na tela (deve pedir uma <strong>segunda confirmação</strong>).</p>
+    <p>→ Feche a página que abriu para voltar ao WhatsApp e verifique se chegou uma <strong>mensagem de cancelamento</strong>.</p>
+
+    <h2>Teste 2: confirmar uma reunião</h2>
+    <h3>Calendly</h3>
+    <p>→ Agende uma reunião no Calendly: <a href="https://calendly.com/mm-advisor/asesoria-de-excursiones-en-bariloche-clon">calendly.com/mm-advisor/asesoria-de-excursiones-en-bariloche-clon</a></p>
+    <h3>WhatsApp</h3>
+    <p>→ Repita os passos, mas desta vez <strong>confirme</strong> em vez de cancelar. Nos conte o que você vê:</p>
+        <ul>
+          <li>Deve abrir uma página avisando que a reunião <strong>foi confirmada</strong>, <strong>em português</strong>.</li>
+        </ul>
+    <p>→ Feche essa página e verifique se chega <strong>outra mensagem de WhatsApp</strong> confirmando a reunião.</p>
+  </main>
+</body>
+</html>

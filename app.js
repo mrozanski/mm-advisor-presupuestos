@@ -4,9 +4,9 @@
  *
  * Flow:
  * 1. Optional local fixture (test-data/*.json) on localhost or ?local=1
- * 2. URL params id, gid → resolve tab name → batchGet grid A1:L{DATA_END_ROW} + Z1
- * 3. Layout v1 (legacy A–K) vs v2 (URL column D) vs v3 (meta block + semver K1/Z1)
- * 4. Parse, populate DOM; v2/v3 activities may show title + external-link icon; v3 pagos extras from C26:C40
+ * 2. URL params id, gid → resolve tab name → batchGet grid A1:M{DATA_END_ROW} + Z1
+ * 3. Layout v1 (legacy A–K) vs v2 (URL column D) vs v3 (meta block + semver K1/Z1) vs v4 (HORARIOS column C)
+ * 4. Parse, populate DOM; v2/v3/v4 activities may show title + external-link icon; v3/v4 pagos extras from C26:C40
  *
  * On failure, default layout remains with error banner.
  */
@@ -28,6 +28,8 @@
   var LOCAL_FIXTURE_V2_PATH = 'test-data/response-v2-dev.json';
   /** v3 meta block + semver in K1 (and optional Z1). */
   var LOCAL_FIXTURE_V3_PATH = 'test-data/response-v3-dev.json';
+  /** v4 HORARIOS column + semver v4.0.0 in K1. */
+  var LOCAL_FIXTURE_V4_PATH = 'test-data/response-v4-dev.json';
 
   var CURRENCY_MAP = {
     'R$':  { symbol: 'R$',  label: 'R$ (Reais)',           locale: 'pt-BR' },
@@ -79,10 +81,13 @@
   }
 
   /**
-   * @param {'v1'|'v2'|'v3'} layout
+   * @param {'v1'|'v2'|'v3'|'v4'} layout
    */
   function detectCurrency(rows, layout) {
-    var priceCols = (layout === 'v2' || layout === 'v3') ? [5, 7, 9, 10] : [4, 6, 8, 9];
+    var priceCols;
+    if (layout === 'v4') priceCols = [6, 8, 10, 11];
+    else if (layout === 'v2' || layout === 'v3') priceCols = [5, 7, 9, 10];
+    else priceCols = [4, 6, 8, 9];
     var hasUsd = false;
     var hasArs = false;
     var hasRs = false;
@@ -285,18 +290,40 @@
     return { parsed: null, raw: '' };
   }
 
-  /** Row index of DIA + URL header (v3 activity table). Returns -1 if not found. */
-  function findV3ActivityHeaderIndex(rows) {
+  /**
+   * Row index of DIA + URL header. URL column is D (v2/v3) or E (v4).
+   * @param {'v2'|'v3'|'v4'} layout
+   */
+  function findActivityHeaderIndex(rows, layout) {
     if (!rows) return -1;
+    var urlCol = layout === 'v4' ? 4 : 3;
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i];
       if (!r) continue;
       var c0 = String(r[0] || '').trim().toLowerCase().replace(/í/g, 'i').replace(/á/g, 'a');
       if (c0 !== 'dia') continue;
-      var d = String(r[3] || '').trim().toLowerCase();
+      var d = String(r[urlCol] || '').trim().toLowerCase();
       if (d.indexOf('url') !== -1) return i;
     }
     return -1;
+  }
+
+  /** Row index of DIA + URL header (v3 activity table). Returns -1 if not found. */
+  function findV3ActivityHeaderIndex(rows) {
+    return findActivityHeaderIndex(rows, 'v3');
+  }
+
+  function headerLooksLikeV4(rows) {
+    if (!rows) return false;
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (!r) continue;
+      var c0 = String(r[0] || '').trim().toLowerCase().replace(/í/g, 'i').replace(/á/g, 'a');
+      if (c0 !== 'dia') continue;
+      var c = String(r[2] || '').trim().toLowerCase().replace(/í/g, 'i');
+      if (c.indexOf('horario') !== -1) return true;
+    }
+    return false;
   }
 
   function looksLikeV3MetaBlock(rows) {
@@ -306,13 +333,16 @@
   }
 
   /**
-   * @returns {'v1'|'v2'|'v3'}
+   * @returns {'v1'|'v2'|'v3'|'v4'}
    */
   function resolveLayout(rows, versionRawZ1) {
     var sv = getSheetSemver(rows, versionRawZ1);
+    if (sv.parsed && sv.parsed.major >= 4) return 'v4';
     if (sv.parsed && sv.parsed.major >= 3) return 'v3';
     if (sv.parsed && sv.parsed.major >= 2) return 'v2';
+    if (rows && looksLikeV3MetaBlock(rows) && findActivityHeaderIndex(rows, 'v4') > 0) return 'v4';
     if (rows && looksLikeV3MetaBlock(rows) && findV3ActivityHeaderIndex(rows) > 0) return 'v3';
+    if (rows && headerLooksLikeV4(rows)) return 'v4';
     if (rows && headerLooksLikeV2(rows)) return 'v2';
     return 'v1';
   }
@@ -351,11 +381,11 @@
   }
 
   /**
-   * batchGet: grid A1:L{DATA_END_ROW} + Z1 (column Z exists in all sheets; AA may error on narrow grids)
+   * batchGet: grid A1:M{DATA_END_ROW} + Z1 (column Z exists in all sheets; AA may error on narrow grids)
    * @returns {Promise<{ gridRows: Array, versionRaw: * }|null>}
    */
   async function fetchSheetData(spreadsheetId, tabName) {
-    var gridRangeStr = tabName + '!A1:L' + DATA_END_ROW;
+    var gridRangeStr = tabName + '!A1:M' + DATA_END_ROW;
     var versionRangeStr = tabName + '!Z1';
     var url = SHEETS_API + '/' + spreadsheetId
       + '/values:batchGet'
@@ -431,6 +461,7 @@
     var v = new URLSearchParams(location.search).get('fixture');
     if (v === 'v2') return [LOCAL_FIXTURE_V2_PATH, LOCAL_FIXTURE_PATH];
     if (v === 'v3') return [LOCAL_FIXTURE_V3_PATH, LOCAL_FIXTURE_V2_PATH, LOCAL_FIXTURE_PATH];
+    if (v === 'v4') return [LOCAL_FIXTURE_V4_PATH, LOCAL_FIXTURE_V3_PATH, LOCAL_FIXTURE_PATH];
     return [LOCAL_FIXTURE_PATH, LOCAL_FIXTURE_V2_PATH];
   }
 
@@ -490,6 +521,29 @@
     return null;
   }
 
+  /** One v4-shaped activity row (HORARIOS column C, URL column E, subtotal column L). */
+  function parseActivityRowV4(row) {
+    var excursion = (row[3] || '').toString().trim();
+    if (!excursion) return null;
+    var rawUrl = row[4];
+    var urlStr = rawUrl !== null && rawUrl !== undefined ? String(rawUrl).trim() : '';
+    var horarios = String(row[2] || '').trim();
+    return {
+      day: row[0] || '',
+      date: row[1] || '',
+      horarios: horarios,
+      excursion: excursion,
+      url: isSafeHttpUrl(urlStr) ? urlStr : '',
+      adultsQty: parseNum(row[5]),
+      adultsPrice: parseNum(row[6]),
+      minorsQty: parseNum(row[7]),
+      minorsPrice: parseNum(row[8]),
+      infantsQty: parseNum(row[9]),
+      infantsPrice: parseNum(row[10]),
+      totalExcursion: parseNum(row[11])
+    };
+  }
+
   /** One v2-shaped activity row (URL column D, subtotal column K). Returns null if not an activity row. */
   function parseActivityRowV2(row) {
     var excursion = (row[2] || '').toString().trim();
@@ -508,6 +562,117 @@
       infantsQty: parseNum(row[8]),
       infantsPrice: parseNum(row[9]),
       totalExcursion: parseNum(row[10])
+    };
+  }
+
+  function buildDayGroups(activities) {
+    var dayMap = {};
+    activities.forEach(function (a) {
+      var key = String(a.day);
+      if (!dayMap[key]) {
+        dayMap[key] = { day: a.day, date: a.date, activities: [] };
+      }
+      dayMap[key].activities.push(a);
+    });
+    return Object.keys(dayMap)
+      .sort(function (a, b) { return parseInt(a) - parseInt(b); })
+      .map(function (key) { return dayMap[key]; });
+  }
+
+  function parseEstimateDataV4(rows, tabName) {
+    var headerIdx = findActivityHeaderIndex(rows, 'v4');
+    if (headerIdx < 0) {
+      console.warn('[Presupuesto] v4: no activity header row (DIA + URL) found.');
+    }
+
+    var issueRaw = rows[1] && rows[1][2];
+    var issueDateDisplay = formatDate(issueRaw);
+
+    var clientCell = rows[0] && rows[0][2] !== undefined && rows[0][2] !== null
+      ? String(rows[0][2]).trim() : '';
+    var displayName = clientCell || tabName;
+
+    var adultsMeta = parseNum(rows[2] && rows[2][2]);
+    var minorsMeta = parseNum(rows[3] && rows[3][2]);
+    var infantsMeta = parseNum(rows[4] && rows[4][2]);
+
+    var body = headerIdx >= 0
+      ? rows.slice(headerIdx + 1, Math.min(rows.length, PAGOS_EXTRAS_ROW_START))
+      : [];
+    var activities = [];
+    for (var i = 0; i < body.length; i++) {
+      var act = parseActivityRowV4(body[i]);
+      if (act) activities.push(act);
+    }
+
+    var currency = detectCurrency(body, 'v4');
+    var pagosExtras = parsePagosExtrasFromGrid(rows);
+    var grandTotal = activities.reduce(function (sum, a) {
+      return sum + a.totalExcursion;
+    }, 0);
+    var dayGroups = buildDayGroups(activities);
+
+    return {
+      clientName: displayName,
+      currency: currency,
+      issueDateDisplay: issueDateDisplay,
+      activities: activities,
+      dayGroups: dayGroups,
+      grandTotal: grandTotal,
+      tripDays: dayGroups.length,
+      tripDateRange: buildTripDateRange(activities),
+      layout: 'v4',
+      pagosExtras: pagosExtras,
+      passengers: {
+        adults: adultsMeta,
+        minors: minorsMeta,
+        infants: infantsMeta
+      }
+    };
+  }
+
+  /** v4 semver on a v2-shaped table (no meta block). Defensive only. */
+  function parseEstimateDataV2ShapedV4(rows, tabName) {
+    var issueCol = 12;
+    var issueRaw = rows[4] && rows[4][issueCol];
+    var issueDateDisplay = formatDate(issueRaw);
+
+    var activityRows = rows.slice(1);
+    var currency = detectCurrency(activityRows, 'v4');
+    var activities = [];
+    for (var i = 0; i < activityRows.length; i++) {
+      var act = parseActivityRowV4(activityRows[i]);
+      if (act) activities.push(act);
+    }
+
+    var grandTotal = activities.reduce(function (sum, a) {
+      return sum + a.totalExcursion;
+    }, 0);
+
+    var maxAdults = 0, maxMinors = 0, maxInfants = 0;
+    activities.forEach(function (a) {
+      if (a.adultsQty > maxAdults) maxAdults = a.adultsQty;
+      if (a.minorsQty > maxMinors) maxMinors = a.minorsQty;
+      if (a.infantsQty > maxInfants) maxInfants = a.infantsQty;
+    });
+
+    var dayGroups = buildDayGroups(activities);
+
+    return {
+      clientName: tabName,
+      currency: currency,
+      issueDateDisplay: issueDateDisplay,
+      activities: activities,
+      dayGroups: dayGroups,
+      grandTotal: grandTotal,
+      tripDays: dayGroups.length,
+      tripDateRange: buildTripDateRange(activities),
+      layout: 'v4',
+      passengers: {
+        adults: maxAdults,
+        minors: maxMinors,
+        infants: maxInfants
+      }
     };
   }
 
@@ -544,18 +709,7 @@
       return sum + a.totalExcursion;
     }, 0);
 
-    var dayMap = {};
-    activities.forEach(function (a) {
-      var key = String(a.day);
-      if (!dayMap[key]) {
-        dayMap[key] = { day: a.day, date: a.date, activities: [] };
-      }
-      dayMap[key].activities.push(a);
-    });
-
-    var dayGroups = Object.keys(dayMap)
-      .sort(function (a, b) { return parseInt(a) - parseInt(b); })
-      .map(function (key) { return dayMap[key]; });
+    var dayGroups = buildDayGroups(activities);
 
     return {
       clientName: displayName,
@@ -577,6 +731,10 @@
   }
 
   function parseEstimateData(rows, tabName, layout) {
+    if (layout === 'v4') {
+      if (looksLikeV3MetaBlock(rows)) return parseEstimateDataV4(rows, tabName);
+      return parseEstimateDataV2ShapedV4(rows, tabName);
+    }
     if (layout === 'v3') {
       return parseEstimateDataV3(rows, tabName);
     }
@@ -625,18 +783,7 @@
       if (a.infantsQty > maxInfants) maxInfants = a.infantsQty;
     });
 
-    var dayMap = {};
-    activities.forEach(function (a) {
-      var key = String(a.day);
-      if (!dayMap[key]) {
-        dayMap[key] = { day: a.day, date: a.date, activities: [] };
-      }
-      dayMap[key].activities.push(a);
-    });
-
-    var dayGroups = Object.keys(dayMap)
-      .sort(function (a, b) { return parseInt(a) - parseInt(b); })
-      .map(function (key) { return dayMap[key]; });
+    var dayGroups = buildDayGroups(activities);
 
     var tripDays = dayGroups.length;
 
@@ -677,11 +824,11 @@
 
     var pagosSection = document.getElementById('pagos-extras');
     if (pagosSection) {
-      if (data.layout !== 'v3') {
+      if (data.layout !== 'v3' && data.layout !== 'v4') {
         // v1/v2: leave hardcoded HTML content as-is.
         pagosSection.hidden = false;
       } else {
-        // v3: display pagos extras from range.
+        // v3/v4: display pagos extras from range.
         var extras = data.pagosExtras || [];
         if (extras.length === 0) {
           pagosSection.hidden = true;
@@ -731,18 +878,39 @@
       var dayEl = tplDay.content.cloneNode(true);
       var dayBubble = dayEl.querySelector('[data-field="dayNumber"]');
       var dayDate = dayEl.querySelector('[data-field="dayDate"]');
+      var dayHorario = dayEl.querySelector('[data-field="dayHorario"]');
       var dayCard = dayEl.querySelector('.day-card');
 
       if (dayBubble) dayBubble.textContent = group.day;
       if (dayDate) dayDate.textContent = formatDate(group.date);
 
+      var firstActivity = group.activities[0];
+      if (dayHorario) {
+        if (firstActivity && firstActivity.horarios) {
+          dayHorario.textContent = firstActivity.horarios;
+          dayHorario.hidden = false;
+        } else {
+          dayHorario.textContent = '';
+          dayHorario.hidden = true;
+        }
+      }
+
       var article = dayEl.querySelector('.day-entry');
       if (article) article.setAttribute('aria-label', 'Día ' + group.day);
 
-      group.activities.forEach(function (activity) {
+      group.activities.forEach(function (activity, actIdx) {
         var actEl = tplActivity.content.cloneNode(true);
         var nameEl = actEl.querySelector('[data-field="excursionName"]');
         var paxList = actEl.querySelector('.pax-list');
+        var horarioRow = actEl.querySelector('[data-field="activityHorarioRow"]');
+        var horarioEl = actEl.querySelector('[data-field="activityHorario"]');
+
+        if (actIdx > 0 && activity.horarios) {
+          if (horarioRow) horarioRow.hidden = false;
+          if (horarioEl) horarioEl.textContent = activity.horarios;
+        } else if (horarioRow) {
+          horarioRow.hidden = true;
+        }
 
         if (nameEl) {
           nameEl.textContent = '';

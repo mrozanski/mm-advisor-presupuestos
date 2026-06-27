@@ -130,8 +130,8 @@
           <div class="day-bubble" aria-hidden="true">1</div>
           <div class="day-card">
             <div class="day-card-header">
-              <span></span>
               <span class="day-date">--/--/----</span>
+              <span class="day-horario" hidden></span>
             </div>
             <div class="activity">
               <p class="activity-name">Cargando actividades...</p>
@@ -216,8 +216,8 @@
       <div class="day-bubble" aria-hidden="true" data-field="dayNumber"></div>
       <div class="day-card">
         <div class="day-card-header">
-          <span></span>
           <span class="day-date" data-field="dayDate"></span>
+          <span class="day-horario" data-field="dayHorario" hidden></span>
         </div>
         <!-- activities are appended here by JS -->
       </div>
@@ -226,6 +226,10 @@
 
   <template id="tpl-activity">
     <div class="activity">
+      <div class="activity-horario-row" data-field="activityHorarioRow" hidden>
+        <span></span>
+        <span class="activity-horario" data-field="activityHorario"></span>
+      </div>
       <p class="activity-name" data-field="excursionName"></p>
       <ul class="pax-list">
         <!-- pax rows are appended here by JS -->

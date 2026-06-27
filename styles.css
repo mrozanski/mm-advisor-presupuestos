@@ -27,6 +27,8 @@
 .resumen-passengers strong,
 .day-bubble,
 .day-date,
+.day-horario,
+.activity-horario,
 .pax-calc,
 .total-final-amount {
   font-family: var(--font-numeric);
@@ -261,13 +263,26 @@ header {
   margin-bottom: 12px;
 }
 
-.day-date {
+.day-date,
+.day-horario,
+.activity-horario {
   font-size: 12px;
   color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.04em;
   white-space: nowrap;
+}
+
+.day-horario,
+.activity-horario {
   margin-left: 8px;
+}
+
+.activity-horario-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
 }
 
 /* Activity block */
